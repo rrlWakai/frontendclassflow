@@ -1,0 +1,536 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+
+@property --spot-x {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 78%;
+}
+
+@property --spot-y {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 42%;
+}
+
+.classflow-login {
+  --spot-x: 78%;
+  --spot-y: 42%;
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #060304;
+  color: #efe6e1;
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+
+.classflow-login--professor {
+  --spot-x: 66%;
+  --spot-y: 64%;
+}
+
+.classflow-login::before,
+.classflow-login::after {
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  content: '';
+}
+
+.classflow-login::before {
+  inset: 0;
+  background:
+    radial-gradient(ellipse at var(--spot-x) var(--spot-y), rgb(122 18 38 / 44%), transparent 50%),
+    radial-gradient(ellipse at 50% 50%, transparent 38%, rgb(0 0 0 / 70%) 100%);
+  transition: --spot-x 700ms ease, --spot-y 700ms ease;
+}
+
+.classflow-login::after {
+  inset: -50%;
+  opacity: 0.075;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+.classflow-login__shell {
+  display: flex;
+  width: min(100% - 64px, 1180px);
+  min-height: 100svh;
+  flex-direction: column;
+  margin-inline: auto;
+  padding-block: max(28px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-bottom));
+}
+
+.classflow-login__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.classflow-login__brand {
+  color: #efe6e1;
+  font-family: 'Bodoni Moda', Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.classflow-login__college {
+  color: #9b8b8a;
+  font-size: 13px;
+  letter-spacing: 0.015em;
+}
+
+.classflow-login__main {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 5fr) minmax(300px, 3fr);
+  align-items: center;
+  gap: clamp(48px, 6vw, 88px);
+  padding-block: clamp(48px, 6vh, 72px);
+}
+
+.classflow-login__introduction {
+  animation: classflow-login-enter 700ms both;
+}
+
+.classflow-login__welcome {
+  margin: 0 0 24px;
+  color: #c4b8b3;
+  font-family: 'Bodoni Moda', Georgia, serif;
+  font-size: clamp(22px, 2.3vw, 30px);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+.classflow-login__role-tabs {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.06em;
+  padding-left: 20px;
+}
+
+.classflow-login__role-tab {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: rgb(239 230 225 / 28%);
+  cursor: pointer;
+  font-family: 'Bodoni Moda', Georgia, serif;
+  font-size: clamp(48px, 8.2vw, 112px);
+  font-weight: 400;
+  letter-spacing: -0.065em;
+  line-height: 1.08;
+  text-align: left;
+  transition: color 250ms ease;
+}
+
+.classflow-login__role-tab:hover {
+  color: rgb(239 230 225 / 68%);
+}
+
+.classflow-login__role-tab[aria-selected='true'],
+.classflow-login__role-tab[aria-selected='true']:hover {
+  color: #efe6e1;
+}
+
+.classflow-login__role-tab:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid #a3213a;
+  outline-offset: 8px;
+}
+
+.classflow-login__indicator {
+  position: absolute;
+  left: 0;
+  width: 3px;
+  background: #7a1226;
+  transition:
+    height 350ms cubic-bezier(0.2, 0.75, 0.25, 1),
+    transform 500ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.classflow-login__role-description {
+  max-width: 36ch;
+  min-height: 3.2em;
+  margin: 24px 0 0;
+  color: #9b8b8a;
+  font-size: 17px;
+  line-height: 1.6;
+  animation: classflow-login-description 400ms both;
+}
+
+.classflow-login__form-section {
+  width: 100%;
+  max-width: 360px;
+  justify-self: end;
+  animation: classflow-login-enter 700ms 140ms both;
+}
+
+.classflow-login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.classflow-login__field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.classflow-login__field label {
+  color: #9b8b8a;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+}
+
+.classflow-login__text-input,
+.classflow-login__password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.classflow-login__text-input > svg,
+.classflow-login__password-input > svg {
+  position: absolute;
+  left: 12px;
+  width: 17px;
+  height: 17px;
+  flex: none;
+  color: #9b8b8a;
+  pointer-events: none;
+  transition: color 180ms ease;
+}
+
+.classflow-login__text-input:focus-within > svg,
+.classflow-login__password-input:focus-within > svg {
+  color: #a3213a;
+}
+
+.classflow-login__field input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgb(239 230 225 / 20%);
+  border-radius: 7px;
+  padding: 11px 12px 11px 38px;
+  background-color: rgb(6 3 4 / 48%);
+  color: #efe6e1;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  transition: border-color 220ms ease, background-color 220ms ease;
+}
+
+.classflow-login__field input::placeholder {
+  color: #9b8b8a;
+  opacity: 1;
+}
+
+.classflow-login__field input:focus-visible {
+  border-color: #a3213a;
+  outline: 2px solid rgb(163 33 58 / 45%);
+  outline-offset: 2px;
+}
+
+.classflow-login__field input:-webkit-autofill,
+.classflow-login__field input:-webkit-autofill:hover,
+.classflow-login__field input:-webkit-autofill:focus,
+.classflow-login__field input:autofill {
+  -webkit-box-shadow: 0 0 0 1000px #060304 inset;
+  box-shadow: 0 0 0 1000px #060304 inset;
+  -webkit-text-fill-color: #efe6e1;
+  caret-color: #efe6e1;
+  transition: background-color 9999s ease-out 0s;
+}
+
+.classflow-login__password-input input {
+  padding-right: 48px;
+}
+
+.classflow-login__visibility-toggle {
+  position: absolute;
+  right: 5px;
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #9b8b8a;
+  cursor: pointer;
+}
+
+.classflow-login__visibility-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.classflow-login__visibility-toggle:hover {
+  color: #efe6e1;
+  background: rgb(239 230 225 / 7%);
+}
+
+.classflow-login__visibility-toggle:focus-visible,
+.classflow-login__remember input:focus-visible,
+.classflow-login__submit:focus-visible,
+.classflow-login__footer a:focus-visible,
+.classflow-login__brand:focus-visible {
+  outline: 2px solid #efe6e1;
+  outline-offset: 4px;
+}
+
+.classflow-login__remember {
+  display: flex;
+  min-height: 24px;
+  align-items: center;
+  gap: 10px;
+  color: #9b8b8a;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.classflow-login__remember input {
+  display: grid;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex: none;
+  appearance: none;
+  border: 1px solid rgb(239 230 225 / 38%);
+  border-radius: 3px;
+  background: rgb(6 3 4 / 48%);
+  cursor: pointer;
+  place-content: center;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.classflow-login__remember input::after {
+  width: 7px;
+  height: 4px;
+  border-bottom: 1.5px solid #efe6e1;
+  border-left: 1.5px solid #efe6e1;
+  content: '';
+  opacity: 0;
+  transform: translateY(-1px) rotate(-45deg);
+}
+
+.classflow-login__remember input:checked {
+  border-color: #7a1226;
+  background: #7a1226;
+}
+
+.classflow-login__remember input:checked::after {
+  opacity: 1;
+}
+
+.classflow-login__remember input:focus-visible {
+  outline: 2px solid #a3213a;
+  outline-offset: 3px;
+}
+
+.classflow-login__submit {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  padding: 16px 20px;
+  border-radius: 7px;
+  background: #7a1226;
+  color: #efe6e1;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  transition: background-color 220ms ease, opacity 220ms ease;
+}
+
+.classflow-login__submit svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 220ms ease;
+}
+
+.classflow-login__submit:hover:not(:disabled) {
+  background: #a3213a;
+}
+
+.classflow-login__submit:hover:not(:disabled) svg {
+  transform: translateX(3px);
+}
+
+.classflow-login__submit:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.classflow-login__feedback {
+  min-height: 28px;
+  margin-top: -13px;
+  color: #9b8b8a;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.classflow-login__error {
+  margin: 0;
+}
+
+.classflow-login__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+  color: #9b8b8a;
+  font-size: 12px;
+}
+
+.classflow-login__footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #9b8b8a;
+  text-decoration: underline;
+  text-decoration-color: rgb(155 139 138 / 55%);
+  text-underline-offset: 4px;
+  transition: color 180ms ease;
+}
+
+.classflow-login__footer a svg {
+  width: 14px;
+  height: 14px;
+}
+
+.classflow-login__footer a:hover {
+  color: #efe6e1;
+}
+
+@keyframes classflow-login-enter {
+  from {
+    filter: blur(5px);
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes classflow-login-description {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 800px) {
+  .classflow-login__shell {
+    width: min(100% - 48px, 620px);
+  }
+
+  .classflow-login__main {
+    grid-template-columns: minmax(0, 1fr) minmax(270px, 0.85fr);
+    gap: 36px;
+  }
+
+  .classflow-login__role-tab {
+    font-size: clamp(48px, 8.5vw, 76px);
+  }
+}
+
+@media (max-width: 640px) {
+  .classflow-login__shell {
+    width: min(100% - 40px, 460px);
+    min-height: 100svh;
+    padding-block: max(24px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-bottom));
+  }
+
+  .classflow-login__college {
+    display: none;
+  }
+
+  .classflow-login__main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 38px;
+    align-content: center;
+    padding-block: 58px 42px;
+  }
+
+  .classflow-login__welcome {
+    margin-bottom: 19px;
+    font-size: 23px;
+  }
+
+  .classflow-login__role-tabs {
+    gap: 0.06em;
+    padding-left: 22px;
+  }
+
+  .classflow-login__role-tab {
+    font-size: clamp(54px, 15vw, 76px);
+  }
+
+  .classflow-login__role-description {
+    min-height: 0;
+    margin-top: 20px;
+    font-size: 15px;
+  }
+
+  .classflow-login__form-section {
+    max-width: none;
+    justify-self: stretch;
+  }
+
+  .classflow-login__form {
+    gap: 22px;
+  }
+
+  .classflow-login__footer {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 380px) {
+  .classflow-login__shell {
+    width: min(100% - 36px, 460px);
+  }
+
+  .classflow-login__main {
+    gap: 30px;
+  }
+
+  .classflow-login__role-tab {
+    font-size: clamp(48px, 14.5vw, 58px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .classflow-login *,
+  .classflow-login *::before,
+  .classflow-login *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

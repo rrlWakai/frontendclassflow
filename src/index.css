@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+
+  --color-canvas: #fafafa;
+  --color-ink: #171717;
+  --color-ink-muted: #6b6670;
+  --color-line: #e5e5e5;
+
+  --color-night-700: #65001f;
+  --color-night-800: #500019;
+  --color-night-900: #350011;
+  --color-night-950: #26000c;
+
+  --color-flow-50: #fff3f5;
+  --color-flow-100: #ffe4ea;
+  --color-flow-200: #fac8d4;
+  --color-flow-300: #ec8ca2;
+  --color-flow-400: #d54b6d;
+  --color-flow-500: #a6193c;
+  --color-flow-600: #850c2c;
+  --color-flow-700: #65001f;
+  --color-flow-800: #500019;
+  --color-flow-900: #350011;
+
+  --color-coral-100: #fff4cd;
+  --color-coral-200: #ffe49a;
+  --color-coral-300: #ffd55c;
+  --color-coral-400: #ffc928;
+  --color-coral-500: #f5b900;
+  --color-coral-600: #9a6500;
+
+  --color-sun-300: #ffc928;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-ink;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: var(--color-coral-200);
+    color: var(--color-night-950);
+  }
+}
+
+#root {
+  min-height: 100svh;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-flow-500) transparent;
+}
+
+@media (max-width: 639px) {
+  body { padding-bottom: env(safe-area-inset-bottom); }
+}
