@@ -24,7 +24,6 @@ import { useSchedules } from '@/hooks/useSchedules'
 import { fetchMyAttendanceSummary } from '@/services/api/attendance'
 import type { OwnAttendanceSummary } from '@/types/attendance'
 import { getApiErrorMessage } from '@/utils/apiError'
-import { formatLongDate } from '@/utils/format'
 import {
   dayLabels,
   formatTimeRange,
@@ -78,9 +77,7 @@ export function StudentDashboardPage() {
   return (
     <div>
       <PageHeading
-        eyebrow="Student workspace"
         title={`${greeting}, ${firstName}.`}
-        description={`${formatLongDate()} · Your timetable, attendance, and college notices in one place.`}
         actions={
           <LinkButton
             to="/student/attendance"
@@ -92,14 +89,14 @@ export function StudentDashboardPage() {
       />
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
-        <Card className="overflow-hidden">
+<Card className="overflow-hidden">
           <div className="border-b border-line bg-surface-subtle px-5 py-3">
             <p className="eyebrow">Up next</p>
           </div>
           <CardBody className="min-h-56">
             {schedulesLoading ? (
               <p role="status" className="py-12 text-center text-sm text-ink-muted">
-                Reading your published timetable…
+                Loading timetable…
               </p>
             ) : schedulesError ? (
               <Alert tone="warning" title="Timetable unavailable">
@@ -116,18 +113,13 @@ export function StudentDashboardPage() {
                       {upcoming.startsInDays === 0
                         ? 'Today'
                         : upcoming.startsInDays === 1
-                          ? 'Tomorrow'
-                          : dayLabels[upcoming.schedule.day_of_week - 1]}
+                        ? 'Tomorrow'
+                        : dayLabels[upcoming.schedule.day_of_week - 1]}
                     </span>
                   </div>
                   <p className="mt-4 text-2xl font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-3xl">
                     {upcoming.schedule.offering.subject.code} ·{' '}
                     {upcoming.schedule.offering.subject.title}
-                  </p>
-                  <p className="mt-2 text-sm text-ink-muted">
-                    {upcoming.schedule.offering.section.code} ·{' '}
-                    {upcoming.schedule.offering.academic_term.name}{' '}
-                    {upcoming.schedule.offering.academic_term.academic_year}
                   </p>
                 </div>
                 <div className="grid gap-3 border-t border-line pt-4 text-sm sm:grid-cols-3">
@@ -154,7 +146,7 @@ export function StudentDashboardPage() {
               <EmptyState
                 icon={CalendarDays}
                 title="No upcoming class"
-                description="Published class meetings connected to your active enrollments will appear here."
+                description="Your published class meetings will appear here."
               />
             )}
           </CardBody>
@@ -162,10 +154,7 @@ export function StudentDashboardPage() {
 
         <Card>
           <CardHeader className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold text-ink">Attendance</h2>
-              <p className="mt-1 text-sm text-ink-muted">Your recorded sessions</p>
-            </div>
+            <h2 className="text-lg font-semibold text-ink">Attendance</h2>
             <Percent className="size-5 text-gold-700" aria-hidden="true" />
           </CardHeader>
           <CardBody>
@@ -226,7 +215,7 @@ export function StudentDashboardPage() {
               <EmptyState
                 icon={ClipboardCheck}
                 title="No attendance recorded"
-                description="Your attendance status will appear after a professor submits a class session."
+                description="Your attendance will appear after a professor submits a session."
                 action={
                   <LinkButton to="/student/attendance" variant="outline" size="sm">
                     Open attendance
@@ -241,10 +230,7 @@ export function StudentDashboardPage() {
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(17rem,0.7fr)]">
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold text-ink">This week</h2>
-              <p className="mt-1 text-sm text-ink-muted">Your published class timetable</p>
-            </div>
+            <h2 className="text-lg font-semibold text-ink">This week</h2>
             <Badge tone="neutral">
               {schedules.length} meeting{schedules.length === 1 ? '' : 's'}
             </Badge>
@@ -260,9 +246,6 @@ export function StudentDashboardPage() {
         <Card className="overflow-hidden">
           <CardHeader>
             <h2 className="text-lg font-semibold text-ink">Today</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              {dayLabels[now.dayOfWeek - 1]} · {formatLongDate()}
-            </p>
           </CardHeader>
           {today.length ? (
             <ol className="divide-y divide-line">
@@ -284,9 +267,6 @@ export function StudentDashboardPage() {
           ) : (
             <div className="px-5 py-10 text-center">
               <p className="text-sm font-semibold text-ink">No classes today</p>
-              <p className="mt-1 text-sm leading-6 text-ink-muted">
-                Check the weekly timetable for your next meeting.
-              </p>
             </div>
           )}
         </Card>

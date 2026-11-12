@@ -35,17 +35,9 @@ function getReturnTo(state: unknown, role: ClassFlowRole) {
   return `${from.pathname}${search}${hash}`
 }
 
-const roles: { role: ClassFlowRole; label: string; description: string }[] = [
-  {
-    role: 'student',
-    label: 'Student',
-    description: 'Your classes, schedule and attendance, kept together.',
-  },
-  {
-    role: 'professor',
-    label: 'Professor',
-    description: 'Your sections, attendance and announcements, kept together.',
-  },
+const roles: { role: ClassFlowRole; label: string }[] = [
+  { role: 'student', label: 'Student' },
+  { role: 'professor', label: 'Professor' },
 ]
 
 const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || '/admin'
@@ -178,8 +170,6 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
     }
   }
 
-  const selectedRole = roles.find((option) => option.role === role)
-
   return (
     <div className={`classflow-login classflow-login--${role}`}>
       <div className="classflow-login__shell">
@@ -194,7 +184,7 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
 
         <main className="classflow-login__main">
           <section className="classflow-login__introduction" aria-label="Choose an account type">
-            <p className="classflow-login__welcome">Welcome back. Sign in as</p>
+            <p className="classflow-login__welcome">Welcome back</p>
 
             <div
               ref={roleTabsRef}
@@ -236,10 +226,6 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
                 aria-hidden="true"
               />
             </div>
-
-            <p key={role} className="classflow-login__role-description">
-              {selectedRole?.description}
-            </p>
           </section>
 
           <section

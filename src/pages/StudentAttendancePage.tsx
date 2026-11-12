@@ -91,12 +91,9 @@ export function StudentAttendancePage() {
   return (
     <div>
       <PageHeading
-        eyebrow="Student workspace"
         title="My attendance"
-        description="Scan your Professor's QR code to check in, then review attendance recorded for your enrolled classes."
         actions={(
           <div className="flex flex-wrap items-center gap-2">
-            <Badge tone="coral">Personal record</Badge>
             <Button
               type="button"
               size="sm"
@@ -152,9 +149,6 @@ export function StudentAttendancePage() {
         <Card className="min-w-0">
           <CardHeader>
             <h2 className="text-base font-semibold text-ink">Attendance history</h2>
-            <p className="mt-1 text-xs text-ink-muted">
-              Historical records remain available if a class schedule is later cancelled.
-            </p>
           </CardHeader>
 
           <div className="grid gap-3 px-5 pb-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -351,7 +345,6 @@ export function StudentAttendancePage() {
         <Card className="p-5">
           <CardHeader>
             <h2 className="text-base font-semibold text-ink">By subject</h2>
-            <p className="mt-1 text-xs text-ink-muted">Submitted attendance records only</p>
           </CardHeader>
           {isLoading ? (
             <p role="status" className="py-8 text-sm text-ink-muted">Loading summaries…</p>
@@ -373,9 +366,6 @@ export function StudentAttendancePage() {
               description="Subject totals appear when attendance is recorded."
             />
           )}
-          <p className="mt-4 border-t border-line pt-4 text-xs leading-5 text-ink-muted">
-            Attendance is read-only. Contact the Professor for a correction; updates are audited.
-          </p>
         </Card>
       </div>
     </div>

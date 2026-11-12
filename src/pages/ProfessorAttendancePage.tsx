@@ -279,8 +279,8 @@ export function ProfessorAttendancePage() {
 
     setConfirmDialog({
       variant: 'confirm',
-      title: 'Cancel attendance session',
-      description: 'Its records will be retained and the session will no longer accept check-ins.',
+      title: 'Cancel session',
+      description: 'Records will be kept but no further check-ins will be accepted.',
       confirmLabel: 'Cancel session',
       cancelLabel: 'Keep session',
       destructive: true,
@@ -288,12 +288,12 @@ export function ProfessorAttendancePage() {
         setConfirmDialog({
           variant: 'prompt',
           title: 'Cancellation reason',
-          description: 'Provide a reason for cancelling this session.',
+          description: 'Why are you cancelling this session?',
           confirmLabel: 'Confirm cancellation',
           cancelLabel: 'Back',
           destructive: true,
           inputLabel: 'Reason',
-          inputPlaceholder: 'Why is this session being cancelled?',
+          inputPlaceholder: 'Reason for cancellation',
           onConfirm: async (reason) => {
             setConfirmDialog(null)
             if (!reason || reason.trim().length < 3) return
@@ -317,9 +317,7 @@ export function ProfessorAttendancePage() {
   return (
     <div>
       <PageHeading
-        eyebrow="Professor workspace"
         title="Attendance"
-        description="Record attendance for your assigned published classes and review your session history."
         actions={<Badge tone="flow">My classes</Badge>}
       />
 
@@ -334,9 +332,6 @@ export function ProfessorAttendancePage() {
           <Card className="p-5">
             <CardHeader>
               <h2 className="text-base font-semibold text-ink">Start a class session</h2>
-              <p className="mt-1 text-xs leading-5 text-ink-muted">
-                Only your assigned published schedules are available.
-              </p>
             </CardHeader>
             {schedulesError ? (
               <p role="alert" className="mt-3 text-sm text-red-700">{schedulesError}</p>
@@ -396,7 +391,7 @@ export function ProfessorAttendancePage() {
               <EmptyState
                 icon={ClipboardCheck}
                 title="No sessions yet"
-                description="Created sessions will appear here."
+                description="Create a session to get started."
               />
             ) : (
               <ul className="mt-3 space-y-2">
@@ -444,7 +439,7 @@ export function ProfessorAttendancePage() {
             <EmptyState
               icon={ClipboardCheck}
               title="Select or create a session"
-              description="Open a session to record attendance, submit the roster, or review previous records."
+              description="Choose a session to record attendance."
             />
           ) : isLoadingDetail ? (
             <p role="status" className="py-16 text-center text-sm text-ink-muted">Loading session roster…</p>
@@ -696,7 +691,7 @@ export function ProfessorAttendancePage() {
                         setConfirmDialog({
                           variant: 'confirm',
                           title: 'Submit attendance',
-                          description: 'Finalize attendance records for this class session. Submitted sessions can still be corrected with a reason.',
+                          description: 'Finalize attendance for this session. You can still correct it later with a reason.',
                           confirmLabel: 'Submit attendance',
                           cancelLabel: 'Keep as draft',
                           destructive: false,
@@ -726,7 +721,7 @@ export function ProfessorAttendancePage() {
             <EmptyState
               icon={ClipboardCheck}
               title="Session unavailable"
-              description="This session could not be loaded. Refresh your session list and try again."
+              description="Could not load session. Try again."
             />
           )}
         </Card>

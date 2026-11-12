@@ -1,7 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   BookOpen,
-  CheckCircle2,
   ClipboardCheck,
   Clock,
   Users,
@@ -22,7 +21,6 @@ import { formatLongDate } from '@/utils/format'
 interface StatItem {
   label: string
   value: string
-  hint: string
   icon: LucideIcon
   tone: string
 }
@@ -31,31 +29,21 @@ const stats: StatItem[] = [
   {
     label: 'Active classes',
     value: '0',
-    hint: 'Assigned sections',
     icon: BookOpen,
     tone: 'bg-flow-50 text-flow-700',
   },
   {
     label: 'Students',
     value: '0',
-    hint: 'Across all classes',
     icon: Users,
     tone: 'bg-indigo-50 text-indigo-700',
   },
   {
     label: 'Attendance captured',
     value: '—',
-    hint: 'No sessions yet',
     icon: ClipboardCheck,
     tone: 'bg-coral-100 text-coral-600',
   },
-]
-
-const readiness = [
-  { label: 'Professor route guard', ready: true },
-  { label: 'API response contract', ready: true },
-  { label: 'Class and schedule data', ready: false },
-  { label: 'Attendance workflows', ready: false },
 ]
 
 export function ProfessorDashboardPage() {
@@ -72,9 +60,7 @@ export function ProfessorDashboardPage() {
   return (
     <div>
       <PageHeading
-        eyebrow="Professor workspace"
         title={`Good day, ${firstName}.`}
-        description="Your assigned classes and published weekly schedule are available here. Session and attendance workflows will follow in a later stage."
         actions={<Badge tone="flow">Faculty</Badge>}
       />
 
@@ -100,37 +86,31 @@ export function ProfessorDashboardPage() {
               <p className="mt-3 text-3xl font-semibold tracking-tight text-ink">
                 {stat.label === 'Active classes' ? schedules.length.toString() : stat.value}
               </p>
-              <p className="mt-1 text-xs text-ink-muted">{stat.hint}</p>
             </Card>
           )
         })}
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
-        <Card className="p-5">
-          <CardHeader className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-base font-semibold text-ink">Teaching queue</h2>
-              <p className="mt-0.5 text-xs text-ink-muted">Your published weekly classes</p>
-            </div>
-            <Badge tone={schedules.length ? 'success' : 'neutral'}>{schedules.length} classes</Badge>
-          </CardHeader>
-          <WeeklySchedule schedules={schedules} loading={schedulesLoading} error={schedulesError} role="Professor" />
-        </Card>
+<Card>
+        <CardHeader className="flex items-center justify-between gap-4">
+          <h2 className="text-base font-semibold text-ink">Teaching queue</h2>
+          <Badge tone={schedules.length ? 'success' : 'neutral'}>{schedules.length} classes</Badge>
+        </CardHeader>
+        <WeeklySchedule schedules={schedules} loading={schedulesLoading} error={schedulesError} role="Professor" />
+      </Card>
 
-        <div className="space-y-5">
-          <Card className="p-5">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-muted">
-                  Today
-                </p>
-                <Clock className="size-4 text-flow-600" aria-hidden="true" />
-              </div>
-            </div>
-            <p className="mt-3 text-lg font-semibold leading-7 text-ink">
-              {formatLongDate()}
+      <div className="space-y-5">
+        <Card className="p-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-muted">
+              Today
             </p>
+            <Clock className="size-4 text-flow-600" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-lg font-semibold leading-7 text-ink">
+            {formatLongDate()}
+          </p>
             {todaysSchedules.length ? (
               <>
                 <p className="mt-2 text-sm text-ink-muted">
@@ -168,37 +148,6 @@ export function ProfessorDashboardPage() {
           <ApiStatusCard />
         </div>
       </div>
-
-      <Card className="mt-5">
-        <CardHeader>
-          <h2 className="text-base font-semibold text-ink">Foundation status</h2>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            What is ready now versus what Phase 2 adds
-          </p>
-        </CardHeader>
-        <div className="grid gap-x-8 gap-y-3 p-5 sm:grid-cols-2">
-          {readiness.map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5 text-sm">
-              {item.ready ? (
-                <CheckCircle2 className="size-4 shrink-0 text-emerald-600" aria-hidden="true" />
-              ) : (
-                <Clock className="size-4 shrink-0 text-ink-muted/60" aria-hidden="true" />
-              )}
-              <span className={item.ready ? 'text-ink' : 'text-ink-muted'}>{item.label}</span>
-              <span
-                className={cn(
-                  'ml-auto rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em]',
-                  item.ready
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : 'bg-slate-100 text-ink-muted',
-                )}
-              >
-                {item.ready ? 'Ready' : 'Phase 2'}
-              </span>
-            </div>
-          ))}
-        </div>
-      </Card>
 
       <AnnouncementFeed />
       <UpcomingActivities />

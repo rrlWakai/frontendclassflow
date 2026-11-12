@@ -111,9 +111,7 @@ export function ActivitiesPage() {
   return (
     <>
       <PageHeading
-        eyebrow={role === 'student' ? 'Student workspace' : 'Professor workspace'}
         title="CCS activities"
-        description="Explore upcoming, ongoing, completed, and cancelled activities intended for your audience."
       />
       <Card className="mb-5">
         <form
@@ -125,7 +123,7 @@ export function ActivitiesPage() {
           }}
         >
           <TextField
-            label="Search activities"
+            label="Search"
             value={searchInput}
             placeholder="Title, description, organizer"
             onChange={(event) => setSearchInput(event.target.value)}
@@ -137,7 +135,7 @@ export function ActivitiesPage() {
             </select>
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="activities-state" className="block text-sm font-medium text-ink">Activity state</label>
+            <label htmlFor="activities-state" className="block text-sm font-medium text-ink">Status</label>
             <select id="activities-state" value={status} onChange={(event) => { setPage(1); setStatus(event.target.value as ActivityState | '') }} className="h-11 w-full rounded-lg border border-line bg-white px-3 text-sm">
               {states.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
@@ -171,7 +169,7 @@ export function ActivitiesPage() {
         </>
       ) : (
         <Card>
-          <EmptyState icon={Sparkles} title="No activities found" description="Published activities for your audience will appear here." />
+          <EmptyState icon={Sparkles} title="No activities" description="Published activities will appear here." />
         </Card>
       )}
     </>

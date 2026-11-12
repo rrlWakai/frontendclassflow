@@ -121,9 +121,7 @@ function AnnouncementsPage({ role }: AnnouncementsPageProps) {
   return (
     <>
       <PageHeading
-        eyebrow={role === 'student' ? 'Student workspace' : 'Professor workspace'}
         title="Announcements"
-        description="Published notices for your role and enrolled or assigned classes."
       />
       {error ? (
         <p className="mb-5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700" role="alert">
@@ -181,8 +179,8 @@ function AnnouncementsPage({ role }: AnnouncementsPageProps) {
         <Card>
           <EmptyState
             icon={Megaphone}
-            title="No current announcements"
-            description="Published notices for your audience will appear here."
+            title="No announcements"
+            description="Published notices will appear here."
           />
         </Card>
       )}
