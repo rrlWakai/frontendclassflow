@@ -3,11 +3,12 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { Badge } from '@/components/common/Badge'
 import { Card, CardHeader } from '@/components/common/Card'
 import { EmptyState } from '@/components/common/EmptyState'
+import { LinkButton } from '@/components/common/LinkButton'
 import { fetchMyScheduleConflicts } from '@/services/api/scheduling'
 import type { MyScheduleConflictPage } from '@/types/scheduling'
 import { getApiErrorMessage } from '@/utils/apiError'
 
-export function StudentScheduleConflicts() {
+export function StudentScheduleConflicts({ compact = false }: { compact?: boolean }) {
   const [result, setResult] = useState<MyScheduleConflictPage | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,22 +31,33 @@ export function StudentScheduleConflicts() {
     }
   }, [])
 
+  const visibleConflicts = compact ? result?.conflicts.slice(0, 2) ?? [] : result?.conflicts ?? []
+
   return (
     <Card className="mt-5 overflow-hidden">
-      <CardHeader className="flex items-center justify-between gap-3">
+      <CardHeader className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-base font-semibold text-ink">Schedule conflicts</h2>
+          <h2 className="font-display text-base font-semibold text-ink">
+            {compact ? 'Schedule conflicts' : 'Schedule conflicts'}
+          </h2>
           <p className="mt-1 text-xs text-ink-muted">
             {result?.academic_term
               ? `${result.academic_term.name} · ${result.academic_term.academic_year}`
               : 'Your current academic term'}
           </p>
         </div>
-        {result?.summary.conflict_pairs ? (
-          <Badge tone="warning">
-            {result.summary.conflict_pairs} conflict{result.summary.conflict_pairs === 1 ? '' : 's'}
-          </Badge>
-        ) : null}
+        <div className="flex items-center gap-2">
+          {result?.summary.conflict_pairs ? (
+            <Badge tone="warning">
+              {result.summary.conflict_pairs} conflict{result.summary.conflict_pairs === 1 ? '' : 's'}
+            </Badge>
+          ) : null}
+          {compact && result?.summary.conflict_pairs && result.summary.conflict_pairs > 2 ? (
+            <LinkButton to="/student/schedule-conflicts" variant="ghost" size="sm">
+              View all
+            </LinkButton>
+          ) : null}
+        </div>
       </CardHeader>
 
       {loading ? (
@@ -64,18 +76,20 @@ export function StudentScheduleConflicts() {
         />
       ) : (
         <div className="divide-y divide-line">
-          {result.conflicts.map((conflict) => (
-            <article key={conflict.id} className="p-5">
+          {visibleConflicts.map((conflict) => (
+            <article key={conflict.id} className={compact ? 'p-4' : 'p-5'}>
               <div className="flex flex-wrap items-center gap-2">
-                <Badge tone="warning">{conflict.day_label}</Badge>
-                <span className="text-sm font-semibold text-ink">
+                <Badge tone="warning" className={compact ? 'text-[10px] px-1.5 py-0.5' : ''}>
+                  {conflict.day_label}
+                </Badge>
+                <span className={compact ? 'text-xs' : 'text-sm'} font-semibold text-ink>
                   Overlap: {conflict.overlap.start_time}–{conflict.overlap.end_time}
                 </span>
               </div>
               <div className="mt-3 grid gap-3 md:grid-cols-2">
                 {conflict.classes.map((classItem) => (
-                  <div key={classItem.schedule_id} className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
-                    <p className="font-semibold text-ink">{classItem.subject.code} · {classItem.subject.title}</p>
+                  <div key={classItem.schedule_id} className={compact ? 'rounded-lg border border-amber-200 bg-amber-50/40 p-3' : 'rounded-xl border border-amber-200 bg-amber-50/40 p-4'}>
+                    <p className={compact ? 'text-sm' : 'font-semibold'} text-ink>{classItem.subject.code} · {classItem.subject.title}</p>
                     <p className="mt-1 text-xs text-ink-muted">
                       Section {classItem.section.code}
                       {classItem.section.year_level ? ` · ${classItem.section.year_level.name}` : ''}
@@ -94,10 +108,12 @@ export function StudentScheduleConflicts() {
                   </div>
                 ))}
               </div>
-              <p className="mt-3 flex items-center gap-1.5 text-xs text-ink-muted">
-                <AlertTriangle className="size-3.5 text-amber-600" aria-hidden="true" />
-                Contact your department about these overlapping enrolled classes.
-              </p>
+              {!compact && (
+                <p className="mt-3 flex items-center gap-1.5 text-xs text-ink-muted">
+                  <AlertTriangle className="size-3.5 text-amber-600" aria-hidden="true" />
+                  Contact your department about these overlapping enrolled classes.
+                </p>
+              )}
             </article>
           ))}
         </div>

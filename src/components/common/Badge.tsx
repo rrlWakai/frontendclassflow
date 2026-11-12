@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
-type BadgeTone = 'neutral' | 'brand' | 'gold' | 'success' | 'warning' | 'danger' | 'info'
+type BadgeTone = 'neutral' | 'brand' | 'gold' | 'success' | 'warning' | 'danger' | 'info' | 'flow' | 'coral'
 
 interface BadgeProps {
   children: ReactNode
@@ -17,6 +17,8 @@ const toneStyles: Record<BadgeTone, string> = {
   warning: 'border-[#e9d5a6] bg-warning-soft text-warning',
   danger: 'border-[#efc7c2] bg-danger-soft text-danger',
   info: 'border-[#cad8e2] bg-info-soft text-info',
+  flow: 'border-[#0d9488] bg-[#f0fdfa] text-[#0d9488]',
+  coral: 'border-[#f97316] bg-[#fff7ed] text-[#c2410c]',
 }
 
 export function Badge({ children, tone = 'neutral', className }: BadgeProps) {
