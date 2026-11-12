@@ -11,7 +11,6 @@ import {
   QrCode,
   RefreshCw,
   RotateCcw,
-  ShieldCheck,
   X,
 } from 'lucide-react'
 import { Badge } from '@/components/common/Badge'
@@ -37,47 +36,47 @@ interface StudentQrScannerProps {
 const qrFailures: Record<string, { title: string; message: string }> = {
   token_expired: {
     title: 'QR code expired',
-    message: 'That code is no longer valid. Ask your Professor to refresh the QR code, then scan again.',
+    message: 'This code has expired. Ask your Professor to refresh it.',
   },
   token_invalid: {
     title: 'QR code invalid',
-    message: 'This code was not recognized or has been replaced. Ask your Professor to show the current QR code.',
+    message: 'This code was not recognized. Ask your Professor for the current code.',
   },
   session_closed: {
     title: 'Session closed',
-    message: 'This attendance session is no longer accepting QR check-ins.',
+    message: 'This session is no longer accepting check-ins.',
   },
   session_cancelled: {
     title: 'Session cancelled',
-    message: 'This class meeting has been cancelled, so attendance cannot be recorded.',
+    message: 'This class meeting was cancelled.',
   },
   not_enrolled: {
     title: 'Not enrolled',
-    message: 'You do not have an eligible enrollment for the class linked to this QR code.',
+    message: 'You are not enrolled in this class.',
   },
   already_recorded: {
     title: 'Already recorded',
-    message: 'Your attendance is already on file for this session. You do not need to scan again.',
+    message: 'Your attendance is already recorded for this session.',
   },
   attendance_unavailable: {
     title: 'Attendance unavailable',
-    message: 'QR attendance is not active for this session. Ask your Professor to start it.',
+    message: 'QR attendance is not active. Ask your Professor to start it.',
   },
   camera_denied: {
     title: 'Camera permission denied',
-    message: 'Allow camera access in your browser settings, then try scanning again.',
+    message: 'Allow camera access in browser settings, then retry.',
   },
   camera_unavailable: {
     title: 'Camera unavailable',
-    message: 'No camera could be opened. Close other camera apps or try another device, then retry.',
+    message: 'No camera found. Close other camera apps or try another device.',
   },
   secure_context_required: {
     title: 'Secure connection required',
-    message: 'Camera scanning requires HTTPS or localhost. Open ClassFlow from a secure address and retry.',
+    message: 'Camera scanning requires HTTPS or localhost.',
   },
   unexpected: {
     title: 'Attendance unavailable',
-    message: 'The attendance check-in could not be completed. Please try again.',
+    message: 'Check-in could not be completed. Please try again.',
   },
 }
 
@@ -321,7 +320,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
         </div>
         <h3 className="text-lg font-semibold text-ink">Ready to scan</h3>
         <p className="max-w-sm mx-auto text-sm leading-6 text-ink-muted">
-          Position the QR code inside the scanning frame. Make sure your camera has permission to access this feature.
+          Position the QR code in the frame to check in.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button
@@ -352,7 +351,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
           <h3 className="text-lg font-semibold text-ink">Enter code manually</h3>
         </div>
         <p className="text-sm leading-6 text-ink-muted">
-          Type the QR attendance code shown by your Professor and submit it to check in.
+          Enter the code shown by your Professor to check in.
         </p>
         <div className="space-y-2">
           <label className="block text-sm font-medium text-ink">
@@ -366,9 +365,6 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
             maxLength={64}
             className="h-10 w-full rounded-lg border border-line bg-white px-3 text-sm focus:border-flow-500 focus:outline-none focus:ring-2 focus:ring-flow-500/20"
           />
-          <p className="text-xs text-ink-muted">
-            The code is verified by the server. Expired or already-used codes are rejected.
-          </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 justify-end">
           <Button
@@ -404,9 +400,9 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
           {phase === 'requesting' ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-night-950/85 px-6 text-center text-white">
               <LoaderCircle className="size-9 animate-spin text-flow-300" aria-hidden="true" />
-              <p className="mt-4 text-lg font-semibold">Waiting for camera permission</p>
+              <p className="mt-4 text-lg font-semibold">Waiting for camera</p>
               <p className="mt-2 max-w-sm text-sm leading-6 text-white/70">
-                Approve camera access to begin scanning. Camera access requires HTTPS or localhost.
+                Approve camera access to begin scanning.
               </p>
             </div>
           ) : (
@@ -415,7 +411,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
                 <div className="size-56 max-w-[70%] rounded-2xl border-2 border-flow-300 shadow-[0_0_0_9999px_rgba(11,18,40,0.45)] sm:size-64" />
               </div>
               <div className="absolute inset-x-0 bottom-0 bg-night-950/80 p-3 text-center text-xs font-medium text-white/90">
-                Hold the QR code inside the frame and keep the camera steady.
+                Hold the QR code in the frame.
               </div>
             </>
           )}
@@ -427,21 +423,13 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
               <p className="text-sm font-semibold">Scanning</p>
             </div>
             <ul className="mt-3 space-y-2 text-xs leading-5 text-flow-900">
-              <li>Point your camera at the QR code on the classroom display.</li>
-              <li>Make sure the full code is visible in the frame.</li>
-              <li>Wait for the attendance confirmation on this page.</li>
+              <li>Point camera at the QR code.</li>
+              <li>Keep the full code in the frame.</li>
+              <li>Wait for confirmation.</li>
             </ul>
           </div>
           <div className="rounded-xl border border-line p-4 text-xs leading-5 text-ink-muted">
-            <div className="flex items-center gap-2 text-ink">
-              <ShieldCheck className="size-4 text-flow-600" aria-hidden="true" />
-              <p className="font-semibold">Secure check-in</p>
-            </div>
-            <p className="mt-2">
-              The QR code contains only a short-lived opaque token. Your identity comes from your
-              authenticated ClassFlow session.
-            </p>
-            <div className="mt-4 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -469,9 +457,9 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
     scannerContent = (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-line bg-canvas/60 px-6 py-14 text-center">
         <LoaderCircle className="size-9 animate-spin text-flow-600" aria-hidden="true" />
-        <h3 className="mt-4 text-lg font-semibold text-ink">Verifying attendance</h3>
+        <h3 className="mt-4 text-lg font-semibold text-ink">Verifying</h3>
         <p className="mt-2 max-w-sm text-sm leading-6 text-ink-muted">
-          Checking the QR token, session status, and your enrollment.
+          Checking your attendance.
         </p>
       </div>
     )
@@ -574,19 +562,16 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
         className="w-full max-w-lg max-h-[90vh] overflow-hidden rounded-2xl border border-line bg-white shadow-[0_18px_50px_-42px_rgba(11,18,40,0.55)]"
         onClick={(event) => event.stopPropagation()}
       >
-        <CardHeader className="flex flex-wrap items-start justify-between gap-3 pb-4">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-coral-600">
-              QR check-in
-            </p>
-            <h2 className="mt-1 text-lg font-semibold text-ink">
-              Scan your Professor&apos;s QR code
-            </h2>
-            <p className="mt-1 text-xs text-ink-muted">
-              Attendance is recorded against your own signed-in student account.
-            </p>
-          </div>
-          <Button
+<CardHeader className="flex flex-wrap items-start justify-between gap-3 pb-4">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-coral-600">
+            QR check-in
+          </p>
+          <h2 className="mt-1 text-lg font-semibold text-ink">
+            Scan your Professor&apos;s QR code
+          </h2>
+        </div>
+        <Button
             type="button"
             variant="ghost"
             size="sm"

@@ -194,14 +194,12 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
           {[
             ['Subject', `${session.offering.subject.code} - ${session.offering.subject.title}`],
             ['Section', session.offering.section.code],
-            ['Attendance date', session.class_date],
-            ['Session status', session.status],
+            ['Date', session.class_date],
+            ['Status', session.status],
           ].map(([label, value]) => (
             <div key={label} className="rounded-xl border border-line bg-canvas/60 px-3 py-2.5">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
-                {label}
-              </p>
-              <p className="mt-1 truncate font-medium capitalize text-ink">{value}</p>
+              <p className="text-xs text-ink-muted">{label}</p>
+              <p className="mt-1 truncate font-medium text-ink">{value}</p>
             </div>
           ))}
         </div>
@@ -232,8 +230,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
                 {qrImage ? `${formatCountdown(secondsLeft)} remaining` : 'Preparing a fresh code'}
               </div>
               <p className="mt-3 max-w-sm text-xs leading-5 text-ink-muted">
-                Display this code for your class. A new code is generated before the current one expires.
-                Students must scan with their own signed-in ClassFlow account.
+                Display this code. It refreshes automatically before expiring.
               </p>
             </div>
 
@@ -251,9 +248,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
                     ).map(([label, value, Icon]) => (
                       <div key={label} className="rounded-xl border border-line p-3">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
-                            {label}
-                          </p>
+                          <p className="text-xs text-ink-muted">{label}</p>
                           <Icon className="size-4 text-flow-600" aria-hidden="true" />
                         </div>
                         <p className="mt-2 text-2xl font-semibold text-ink">{value}</p>
@@ -263,7 +258,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
 
                   <div>
                     <div className="flex items-center justify-between text-xs text-ink-muted">
-                      <span>Live check-in progress</span>
+                      <span>Check-in progress</span>
                       <span>{monitoring.checked_in}/{monitoring.total_enrolled}</span>
                     </div>
                     <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
@@ -276,9 +271,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
 
                   <div className="rounded-xl border border-line">
                     <div className="border-b border-line px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">
-                        Checked in students
-                      </p>
+                      <p className="text-xs font-semibold text-ink-muted">Checked in students</p>
                     </div>
                     {monitoring.checked_in_students.length ? (
                       <ul className="max-h-52 divide-y divide-line overflow-y-auto">
@@ -334,12 +327,12 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
               <QrCode className="size-7" aria-hidden="true" />
             </div>
             <h3 className="mt-4 text-lg font-semibold text-ink">
-              {sessionOpen ? 'QR attendance is not active' : 'This session cannot accept QR check-ins'}
+              {sessionOpen ? 'QR attendance is inactive' : 'QR check-in unavailable'}
             </h3>
             <p className="mt-2 max-w-md text-sm leading-6 text-ink-muted">
               {sessionOpen
-                ? 'Start a QR attendance period to display a short-lived code for your students.'
-                : 'Only open attendance sessions can use QR check-in.'}
+                ? 'Start QR attendance to display a code for students.'
+                : 'Only open sessions support QR check-in.'}
             </p>
             {sessionOpen ? (
               <Button
