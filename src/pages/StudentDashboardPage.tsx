@@ -1,66 +1,59 @@
 import { useEffect, useState } from 'react'
-import type { LucideIcon } from 'lucide-react'
 import {
-  BookOpen,
+  ArrowRight,
   CalendarDays,
-  Clock,
+  ClipboardCheck,
+  Clock3,
+  MapPin,
   Percent,
-  Sparkles,
+  UserRound,
 } from 'lucide-react'
-import { ApiStatusCard } from '@/components/common/ApiStatusCard'
+import { Alert } from '@/components/common/Alert'
 import { Badge } from '@/components/common/Badge'
-import { Card, CardHeader } from '@/components/common/Card'
+import { Card, CardBody, CardHeader } from '@/components/common/Card'
+import { EmptyState } from '@/components/common/EmptyState'
+import { LinkButton } from '@/components/common/LinkButton'
 import { PageHeading } from '@/components/common/PageHeading'
 import { AnnouncementFeed } from '@/components/announcements/AnnouncementFeed'
 import { UpcomingActivities } from '@/components/activities/UpcomingActivities'
 import { WeeklySchedule } from '@/components/scheduling/WeeklySchedule'
 import { StudentScheduleConflicts } from '@/components/scheduling/StudentScheduleConflicts'
 import { useAuth } from '@/hooks/useAuth'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useSchedules } from '@/hooks/useSchedules'
 import { fetchMyAttendanceSummary } from '@/services/api/attendance'
 import type { OwnAttendanceSummary } from '@/types/attendance'
 import { getApiErrorMessage } from '@/utils/apiError'
-import { cn } from '@/utils/cn'
 import { formatLongDate } from '@/utils/format'
+import {
+  dayLabels,
+  formatTimeRange,
+  getManilaNow,
+  instructorNames,
+  nextClass,
+  roomLabel,
+  todaysSchedules,
+} from '@/utils/schedule'
 
-interface OverviewItem {
-  label: string
-  value: string
-  hint: string
-  icon: LucideIcon
-  tone: string
+function attendanceRate(summary: OwnAttendanceSummary | null): number | null {
+  if (!summary || summary.summary.total === 0) return null
+  return Math.round((summary.summary.present / summary.summary.total) * 100)
 }
 
-const overview: OverviewItem[] = [
-  {
-    label: 'Enrolled classes',
-    value: '0',
-    hint: 'This semester',
-    icon: BookOpen,
-    tone: 'bg-coral-100 text-coral-600',
-  },
-  {
-    label: 'Next class',
-    value: '—',
-    hint: 'Nothing scheduled',
-    icon: CalendarDays,
-    tone: 'bg-flow-50 text-flow-700',
-  },
-  {
-    label: 'Attendance',
-    value: '—',
-    hint: 'No sessions yet',
-    icon: Percent,
-    tone: 'bg-indigo-50 text-indigo-700',
-  },
-]
-
 export function StudentDashboardPage() {
+  useDocumentTitle('Dashboard')
   const { user } = useAuth()
   const { schedules, loading: schedulesLoading, error: schedulesError } = useSchedules()
   const [attendanceSummary, setAttendanceSummary] = useState<OwnAttendanceSummary | null>(null)
+  const [attendanceLoading, setAttendanceLoading] = useState(true)
   const [attendanceError, setAttendanceError] = useState<string | null>(null)
   const firstName = user?.name.split(' ')[0] ?? 'Student'
+  const now = getManilaNow()
+  const hour = Math.floor(now.minutes / 60)
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+  const upcoming = nextClass(schedules, now)
+  const today = todaysSchedules(schedules, now)
+  const rate = attendanceRate(attendanceSummary)
 
   useEffect(() => {
     let active = true
@@ -73,6 +66,9 @@ export function StudentDashboardPage() {
           setAttendanceError(getApiErrorMessage(failure, 'Unable to load attendance summary.'))
         }
       })
+      .finally(() => {
+        if (active) setAttendanceLoading(false)
+      })
 
     return () => {
       active = false
@@ -83,132 +79,227 @@ export function StudentDashboardPage() {
     <div>
       <PageHeading
         eyebrow="Student workspace"
-        title={`Hi, ${firstName}.`}
-        description="Your published class schedule is limited to offerings where you are actively enrolled. Student academic workflows will follow in a later stage."
-        actions={<Badge tone="coral">Student</Badge>}
+        title={`${greeting}, ${firstName}.`}
+        description={`${formatLongDate()} · Your timetable, attendance, and college notices in one place.`}
+        actions={
+          <LinkButton
+            to="/student/attendance"
+            leftIcon={<ClipboardCheck className="size-4" aria-hidden="true" />}
+          >
+            Attendance & QR check-in
+          </LinkButton>
+        }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {overview.map((item) => {
-          const Icon = item.icon
-
-          return (
-            <Card key={item.label} className="p-5">
-              <div className="flex items-start justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
-                  {item.label}
-                </p>
-                <span
-                  className={cn(
-                    'flex size-9 items-center justify-center rounded-xl',
-                    item.tone,
-                  )}
-                >
-                  <Icon className="size-[18px]" aria-hidden="true" />
-                </span>
-              </div>
-              <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink">
-                {item.label === 'Enrolled classes'
-                  ? schedules.length.toString()
-                  : item.label === 'Next class' && schedules.length
-                    ? schedules[0].start_time
-                    : item.label === 'Attendance' && attendanceSummary?.summary.total
-                      ? `${Math.round(
-                          (attendanceSummary.summary.present / attendanceSummary.summary.total) * 100,
-                        )}%`
-                    : item.value}
-              </p>
-              <p className="mt-1 text-xs text-ink-muted">
-                {item.label === 'Attendance'
-                  ? attendanceError
-                    ? attendanceError
-                    : attendanceSummary?.summary.total
-                      ? `${attendanceSummary.summary.present} of ${attendanceSummary.summary.total} recorded sessions present`
-                      : item.hint
-                  : item.hint}
-              </p>
-            </Card>
-          )
-        })}
-      </div>
-
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
-        <Card className="relative overflow-hidden bg-night-950 p-6 text-white">
-          <div
-            className="absolute -right-16 -top-16 size-56 rounded-full bg-coral-500/20 blur-3xl"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute -bottom-20 left-10 size-48 rounded-full bg-flow-500/15 blur-3xl"
-            aria-hidden="true"
-          />
-          <div className="relative">
-            <div className="flex items-center justify-between gap-4">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-coral-300">
-                <Sparkles className="size-3" aria-hidden="true" />
-                Today&apos;s flow
-              </span>
-              <span className="rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">
-                {schedules.length ? `${schedules.length} scheduled` : 'No classes'}
-              </span>
-            </div>
-
-            <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-flow-300">
-              {formatLongDate()}
-            </p>
-            <h2 className="mt-3 max-w-md font-display text-2xl font-semibold leading-snug tracking-[-0.02em]">
-            {schedules.length ? `${schedules[0].offering.subject.code} · ${schedules[0].offering.subject.title}` : 'Your published timetable will appear here.'}
-            </h2>
-            <div className="mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-xs text-white/45">
-              <Clock className="size-3.5" aria-hidden="true" />
-              {schedules.length ? `${schedules[0].offering.section.code} · ${schedules[0].start_time}–${schedules[0].end_time}` : 'Your enrolled offerings will appear after schedules are published.'}
-            </div>
+      <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+        <Card className="overflow-hidden">
+          <div className="border-b border-line bg-surface-subtle px-5 py-3">
+            <p className="eyebrow">Up next</p>
           </div>
+          <CardBody className="min-h-56">
+            {schedulesLoading ? (
+              <p role="status" className="py-12 text-center text-sm text-ink-muted">
+                Reading your published timetable…
+              </p>
+            ) : schedulesError ? (
+              <Alert tone="warning" title="Timetable unavailable">
+                {schedulesError}
+              </Alert>
+            ) : upcoming ? (
+              <div className="flex h-full flex-col justify-between gap-8">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone={upcoming.inProgress ? 'success' : 'brand'}>
+                      {upcoming.inProgress ? 'In progress' : 'Next class'}
+                    </Badge>
+                    <span className="text-xs font-semibold uppercase tracking-[0.1em] text-ink-subtle">
+                      {upcoming.startsInDays === 0
+                        ? 'Today'
+                        : upcoming.startsInDays === 1
+                          ? 'Tomorrow'
+                          : dayLabels[upcoming.schedule.day_of_week - 1]}
+                    </span>
+                  </div>
+                  <p className="mt-4 font-display text-2xl font-medium leading-tight tracking-[-0.02em] text-ink sm:text-3xl">
+                    {upcoming.schedule.offering.subject.code} ·{' '}
+                    {upcoming.schedule.offering.subject.title}
+                  </p>
+                  <p className="mt-2 text-sm text-ink-muted">
+                    {upcoming.schedule.offering.section.code} ·{' '}
+                    {upcoming.schedule.offering.academic_term.name}{' '}
+                    {upcoming.schedule.offering.academic_term.academic_year}
+                  </p>
+                </div>
+                <div className="grid gap-3 border-t border-line pt-4 text-sm sm:grid-cols-3">
+                  <p className="flex items-start gap-2 text-ink">
+                    <Clock3 className="mt-0.5 size-4 shrink-0 text-brand-700" aria-hidden="true" />
+                    <span className="tabular">
+                      {formatTimeRange(
+                        upcoming.schedule.start_time,
+                        upcoming.schedule.end_time,
+                      )}
+                    </span>
+                  </p>
+                  <p className="flex items-start gap-2 text-ink">
+                    <MapPin className="mt-0.5 size-4 shrink-0 text-brand-700" aria-hidden="true" />
+                    {roomLabel(upcoming.schedule)}
+                  </p>
+                  <p className="flex items-start gap-2 text-ink">
+                    <UserRound className="mt-0.5 size-4 shrink-0 text-brand-700" aria-hidden="true" />
+                    {instructorNames(upcoming.schedule) || 'Instructor to be assigned'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <EmptyState
+                icon={CalendarDays}
+                title="No upcoming class"
+                description="Published class meetings connected to your active enrollments will appear here."
+              />
+            )}
+          </CardBody>
         </Card>
 
-        <ApiStatusCard />
-      </div>
-
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
         <Card>
-          <CardHeader className="flex items-center justify-between gap-4">
+          <CardHeader className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-display text-base font-semibold text-ink">This week</h2>
-              <p className="mt-0.5 text-xs text-ink-muted">Upcoming classes and sessions</p>
+              <h2 className="text-lg font-semibold text-ink">Attendance</h2>
+              <p className="mt-1 text-sm text-ink-muted">Your recorded sessions</p>
             </div>
-            <Badge tone={schedules.length ? 'success' : 'neutral'}>{schedules.length ? `${schedules.length} classes` : 'Empty'}</Badge>
+            <Percent className="size-5 text-gold-700" aria-hidden="true" />
           </CardHeader>
-          <WeeklySchedule schedules={schedules} loading={schedulesLoading} error={schedulesError} role="Student" />
-        </Card>
-
-        <Card className="p-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-muted">
-            What to expect
-          </p>
-          <ul className="mt-4 space-y-3.5">
-            {[
-              'Published classes for your active enrollments',
-              'Weekly meeting times and room assignments',
-              'Professor names without exposing private contact details',
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2.5 text-sm leading-6 text-ink">
-                <span
-                  className="mt-2 size-1.5 shrink-0 rounded-full bg-coral-400"
-                  aria-hidden="true"
-                />
-                {item}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 border-t border-line pt-4 text-xs leading-5 text-ink-muted">
-            Schedules are read-only here and are limited to your enrolled offerings.
-          </p>
+          <CardBody>
+            {attendanceLoading ? (
+              <p role="status" className="py-8 text-center text-sm text-ink-muted">
+                Loading attendance…
+              </p>
+            ) : attendanceError ? (
+              <Alert tone="warning" title="Attendance unavailable">
+                {attendanceError}
+              </Alert>
+            ) : attendanceSummary && attendanceSummary.summary.total > 0 && rate !== null ? (
+              <>
+                <p className="tabular font-display text-4xl font-medium leading-none text-brand-800">
+                  {rate}%
+                </p>
+                <p className="mt-2 text-sm text-ink-muted">
+                  {attendanceSummary.summary.present} present of{' '}
+                  {attendanceSummary.summary.total} recorded sessions
+                </p>
+                <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-line pt-4 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-ink-muted">Present</dt>
+                    <dd className="tabular font-semibold text-success">
+                      {attendanceSummary.summary.present}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-ink-muted">Absent</dt>
+                    <dd className="tabular font-semibold text-danger">
+                      {attendanceSummary.summary.absent}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-ink-muted">Late</dt>
+                    <dd className="tabular font-semibold text-warning">
+                      {attendanceSummary.summary.late}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-ink-muted">Excused</dt>
+                    <dd className="tabular font-semibold text-brand-700">
+                      {attendanceSummary.summary.excused}
+                    </dd>
+                  </div>
+                </dl>
+                <LinkButton
+                  to="/student/attendance"
+                  variant="outline"
+                  size="sm"
+                  className="mt-5 w-full"
+                  leftIcon={<ArrowRight className="size-4" aria-hidden="true" />}
+                >
+                  Review attendance
+                </LinkButton>
+              </>
+            ) : (
+              <EmptyState
+                icon={ClipboardCheck}
+                title="No attendance recorded"
+                description="Your attendance status will appear after a professor submits a class session."
+                action={
+                  <LinkButton to="/student/attendance" variant="outline" size="sm">
+                    Open attendance
+                  </LinkButton>
+                }
+              />
+            )}
+          </CardBody>
         </Card>
       </div>
 
-      <AnnouncementFeed />
-      <UpcomingActivities />
-      <StudentScheduleConflicts />
+      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(17rem,0.7fr)]">
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-ink">This week</h2>
+              <p className="mt-1 text-sm text-ink-muted">Your published class timetable</p>
+            </div>
+            <Badge tone="neutral">
+              {schedules.length} meeting{schedules.length === 1 ? '' : 's'}
+            </Badge>
+          </CardHeader>
+          <WeeklySchedule
+            schedules={schedules}
+            loading={schedulesLoading}
+            error={schedulesError}
+            role="Student"
+          />
+        </Card>
+
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <h2 className="text-lg font-semibold text-ink">Today</h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              {dayLabels[now.dayOfWeek - 1]} · {formatLongDate()}
+            </p>
+          </CardHeader>
+          {today.length ? (
+            <ol className="divide-y divide-line">
+              {today.map((schedule) => (
+                <li key={schedule.id} className="px-5 py-4">
+                  <p className="tabular text-xs font-semibold text-brand-700">
+                    {formatTimeRange(schedule.start_time, schedule.end_time)}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-ink">
+                    {schedule.offering.subject.code} · {schedule.offering.section.code}
+                  </p>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-muted">
+                    <MapPin className="size-3.5" aria-hidden="true" />
+                    {roomLabel(schedule)}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="px-5 py-10 text-center">
+              <p className="text-sm font-semibold text-ink">No classes today</p>
+              <p className="mt-1 text-sm leading-6 text-ink-muted">
+                Check the weekly timetable for your next meeting.
+              </p>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <AnnouncementFeed compact />
+        <UpcomingActivities compact />
+      </div>
+
+      <div className="mt-5">
+        <StudentScheduleConflicts compact />
+      </div>
     </div>
   )
 }

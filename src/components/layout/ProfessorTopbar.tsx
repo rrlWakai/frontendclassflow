@@ -1,16 +1,24 @@
-import { LogOut, Menu } from 'lucide-react'
-import { Logo } from '@/components/layout/Logo'
+import { LogOut } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
+import { Logo } from '@/components/layout/Logo'
 import { useAuth } from '@/hooks/useAuth'
 import { initials } from '@/utils/format'
 
-interface ProfessorTopbarProps {
-  onMenuClick: () => void
+const pageLabels: Record<string, string> = {
+  '/professor/dashboard': 'Dashboard',
+  '/professor/attendance': 'Attendance',
+  '/professor/announcements': 'Announcements',
+  '/professor/activities': 'Activities',
 }
 
-export function ProfessorTopbar({ onMenuClick }: ProfessorTopbarProps) {
+function currentPage(pathname: string): string {
+  if (pathname.startsWith('/professor/announcements')) return 'Announcements'
+  if (pathname.startsWith('/professor/activities')) return 'Activities'
+  return pageLabels[pathname] ?? 'Professor workspace'
+}
+
+export function ProfessorTopbar() {
   const { pathname } = useLocation()
-  const title = pathname === '/professor/dashboard' ? 'Dashboard' : 'Professor workspace'
   const { user, logout } = useAuth()
   const departmentLabel =
     user?.profile?.type === 'professor'
@@ -18,39 +26,30 @@ export function ProfessorTopbar({ onMenuClick }: ProfessorTopbarProps) {
       : 'Faculty'
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-white/95 px-4 backdrop-blur md:px-8">
-      <button
-        type="button"
-        onClick={onMenuClick}
-        className="rounded-lg p-2 text-ink-muted transition hover:bg-white hover:text-ink lg:hidden"
-        aria-label="Open navigation"
-      >
-        <Menu className="size-5" aria-hidden="true" />
-      </button>
-
-      <Logo variant="onLight" compact className="lg:hidden" />
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-canvas/95 px-4 backdrop-blur md:px-6 lg:px-8">
+      <Logo variant="onLight" compact className="md:hidden" />
 
       <div className="min-w-0">
-        <p className="hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-muted sm:block">
-          Professor workspace
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+          Teaching desk
         </p>
-        <h1 className="truncate font-display text-lg font-semibold text-ink">{title}</h1>
+        <p className="truncate text-sm font-semibold text-ink">{currentPage(pathname)}</p>
       </div>
 
       <div className="ml-auto flex items-center gap-2.5">
-        <div className="flex size-9 items-center justify-center rounded-full bg-flow-800 text-xs font-bold text-coral-300">
+        <div className="flex size-9 items-center justify-center rounded-full bg-brand-800 text-xs font-bold text-gold-400">
           {user ? initials(user.name) : 'PR'}
         </div>
         <div className="hidden leading-tight sm:block">
-          <p className="max-w-[160px] truncate text-xs font-semibold text-ink">
+          <p className="max-w-40 truncate text-xs font-semibold text-ink">
             {user?.name ?? 'Professor'}
           </p>
-          <p className="text-[11px] text-ink-muted">{departmentLabel}</p>
+          <p className="max-w-40 truncate text-xs text-ink-muted">{departmentLabel}</p>
         </div>
         <button
           type="button"
           onClick={() => void logout()}
-          className="rounded-lg p-2 text-ink-muted transition hover:bg-white hover:text-ink"
+          className="inline-flex size-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-subtle hover:text-ink"
           aria-label="Sign out"
         >
           <LogOut className="size-[18px]" aria-hidden="true" />

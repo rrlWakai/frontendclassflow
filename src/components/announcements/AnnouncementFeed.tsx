@@ -5,6 +5,7 @@ import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { Card, CardHeader } from '@/components/common/Card'
 import { EmptyState } from '@/components/common/EmptyState'
+import { LinkButton } from '@/components/common/LinkButton'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchAnnouncements } from '@/services/api/announcements'
 import type {
@@ -27,7 +28,7 @@ function formatDate(value: string | null): string {
   }).format(new Date(value))
 }
 
-function AnnouncementCard({
+function AnnouncementItem({
   announcement,
   detailBase,
 }: {
@@ -41,46 +42,46 @@ function AnnouncementCard({
       : 'neutral'
 
   return (
-    <article className="border-b border-line px-5 py-5 last:border-0">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge>{formatLabel(announcement.category)}</Badge>
+    <article className="px-5 py-5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-subtle">
+          {formatLabel(announcement.category)}
+        </p>
         {announcement.priority !== 'normal' ? (
           <Badge tone={priorityTone}>{formatLabel(announcement.priority)}</Badge>
         ) : null}
+        <span className="text-xs text-ink-muted">{formatDate(announcement.published_at)}</span>
       </div>
-      <h3 className="mt-3 font-display text-lg font-semibold leading-6 text-ink">
+      <h3 className="mt-2 text-lg font-semibold leading-6 text-ink">
         <Link
           to={`${detailBase}/${announcement.id}`}
-          className="rounded-sm hover:text-flow-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-600"
+          className="rounded-sm hover:text-brand-700"
         >
           {announcement.title}
         </Link>
       </h3>
-      <p className="mt-1 text-xs text-ink-muted">
-        {announcement.author.name} · {formatDate(announcement.published_at)}
-      </p>
+      <p className="mt-1 text-xs text-ink-muted">By {announcement.author.name}</p>
       {announcement.summary ? (
-        <p className="mt-3 text-sm font-medium leading-6 text-ink">{announcement.summary}</p>
+        <p className="mt-2 text-sm leading-6 text-ink">{announcement.summary}</p>
       ) : null}
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-ink-muted">
-        {announcement.content}
-      </p>
-      {announcement.expires_at ? (
-        <p className="mt-3 text-xs text-ink-muted">
-          Available until {formatDate(announcement.expires_at)}
-        </p>
-      ) : null}
-      <Link
-        to={`${detailBase}/${announcement.id}`}
-        className="mt-3 inline-flex rounded-sm text-sm font-semibold text-flow-700 hover:text-flow-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-600"
-      >
-        Read announcement
-      </Link>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Link
+          to={`${detailBase}/${announcement.id}`}
+          className="text-sm font-semibold text-brand-700 hover:text-brand-800"
+        >
+          Read announcement
+        </Link>
+        {announcement.expires_at ? (
+          <span className="text-xs text-ink-muted">
+            Available until {formatDate(announcement.expires_at)}
+          </span>
+        ) : null}
+      </div>
     </article>
   )
 }
 
-export function AnnouncementFeed() {
+export function AnnouncementFeed({ compact = false }: { compact?: boolean }) {
   const { user } = useAuth()
   const detailBase = user?.role === 'professor'
     ? '/professor/announcements'
@@ -124,44 +125,54 @@ export function AnnouncementFeed() {
     setPage(nextPage)
   }
 
+  const visible = compact ? announcements.slice(0, 3) : announcements
+
   return (
-    <Card className="mt-5 overflow-hidden">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Megaphone className="size-4 text-flow-600" aria-hidden="true" />
-          <h2 className="font-display text-base font-semibold text-ink">College announcements</h2>
+    <Card className="overflow-hidden">
+      <CardHeader className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <Megaphone className="size-4 text-brand-700" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-ink">
+              {compact ? 'Recent announcements' : 'College announcements'}
+            </h2>
+          </div>
+          <p className="mt-1 text-sm text-ink-muted">
+            Current notices for your role and classes
+          </p>
         </div>
-        <p className="mt-1 text-xs text-ink-muted">
-          Current notices for your role and enrolled or assigned classes
-        </p>
+        {compact ? (
+          <LinkButton to={`${detailBase}`} variant="ghost" size="sm">
+            View all
+          </LinkButton>
+        ) : null}
       </CardHeader>
       {loading ? (
         <p className="px-5 py-8 text-center text-sm text-ink-muted" role="status">
           Loading announcements…
         </p>
       ) : error ? (
-        <p className="m-5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700" role="alert">
+        <p className="m-5 rounded-md border border-[#efc7c2] bg-danger-soft px-3 py-2.5 text-sm text-danger" role="alert">
           {error}
         </p>
-      ) : announcements.length ? (
+      ) : visible.length ? (
         <>
-          <div>
-            {announcements.map((announcement) => (
-              <AnnouncementCard
+          <div className="divide-y divide-line">
+            {visible.map((announcement) => (
+              <AnnouncementItem
                 key={announcement.id}
                 announcement={announcement}
                 detailBase={detailBase}
               />
             ))}
           </div>
-          {pagination.last_page > 1 ? (
+          {!compact && pagination.last_page > 1 ? (
             <div className="flex items-center justify-between border-t border-line px-5 py-3">
               <p className="text-xs text-ink-muted">
                 Page {pagination.current_page} of {pagination.last_page}
               </p>
               <div className="flex gap-2">
                 <Button
-                  type="button"
                   size="sm"
                   variant="outline"
                   aria-label="Previous announcements page"
@@ -171,7 +182,6 @@ export function AnnouncementFeed() {
                   <ChevronLeft className="size-4" aria-hidden="true" />
                 </Button>
                 <Button
-                  type="button"
                   size="sm"
                   variant="outline"
                   aria-label="Next announcements page"

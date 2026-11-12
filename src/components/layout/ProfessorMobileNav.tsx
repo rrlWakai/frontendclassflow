@@ -10,11 +10,30 @@ const links = [
 ]
 
 export function ProfessorMobileNav() {
-  return <nav aria-label="Professor mobile" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
-    <div className="mx-auto grid max-w-md grid-cols-4">
-      {links.map(({ to, label, icon: Icon }) => <NavLink key={to} to={to} className={({ isActive }) => cn('flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-semibold', isActive ? 'bg-flow-50 text-flow-800' : 'text-ink-muted')}>
-        <Icon className="size-5" aria-hidden="true" /><span>{label}</span>
-      </NavLink>)}
-    </div>
-  </nav>
+  return (
+    <nav
+      aria-label="Professor mobile"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur md:hidden"
+    >
+      <div className="mx-auto grid max-w-md grid-cols-4">
+        {links.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              cn(
+                'flex min-h-14 flex-col items-center justify-center gap-1 rounded-md border-t-2 text-xs font-semibold transition-colors',
+                isActive
+                  ? 'border-gold-500 text-brand-800'
+                  : 'border-transparent text-ink-muted hover:text-ink',
+              )
+            }
+          >
+            <Icon className="size-5" aria-hidden="true" />
+            <span>{label}</span>
+          </NavLink>
+        ))}
+      </div>
+    </nav>
+  )
 }

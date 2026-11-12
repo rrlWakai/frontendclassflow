@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import type { InputHTMLAttributes, ReactNode } from 'react'
+import { controlClassName, labelClassName } from '@/components/common/formStyles'
 import { cn } from '@/utils/cn'
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -24,12 +25,12 @@ export function TextField({
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      <label htmlFor={fieldId} className="block text-sm font-semibold text-ink">
+      <label htmlFor={fieldId} className={labelClassName}>
         {label}
       </label>
       <div className="relative">
         {leftIcon ? (
-          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-ink-muted">
+          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-ink-subtle">
             {leftIcon}
           </span>
         ) : null}
@@ -38,15 +39,16 @@ export function TextField({
           aria-invalid={Boolean(error)}
           aria-describedby={error || hint ? messageId : undefined}
           className={cn(
-            'h-11 w-full rounded-xl border border-line bg-white px-3 text-sm text-ink shadow-sm transition placeholder:text-ink-muted/60 focus:border-flow-500 focus:outline-none focus:ring-2 focus:ring-flow-500/20',
+            controlClassName,
+            'h-11',
             leftIcon ? 'pl-10' : undefined,
-            error && 'border-red-400 focus:border-red-500 focus:ring-red-500/20',
+            error && 'border-danger focus:border-danger focus:ring-danger/20',
           )}
           {...props}
         />
       </div>
       {error ? (
-        <p id={messageId} className="text-xs font-medium text-red-600">
+        <p id={messageId} className="text-xs font-medium text-danger">
           {error}
         </p>
       ) : hint ? (

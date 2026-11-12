@@ -1,23 +1,34 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, CalendarDays, MapPin, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Badge } from '@/components/common/Badge'
 import { Card, CardHeader } from '@/components/common/Card'
 import { EmptyState } from '@/components/common/EmptyState'
+import { LinkButton } from '@/components/common/LinkButton'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchActivities } from '@/services/api/activities'
 import type { Activity } from '@/types/activity'
 import { getApiErrorMessage } from '@/utils/apiError'
 
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('en-PH', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'Asia/Manila',
-  }).format(new Date(value))
+function dateParts(value: string) {
+  const date = new Date(value)
+  return {
+    month: new Intl.DateTimeFormat('en-PH', {
+      month: 'short',
+      timeZone: 'Asia/Manila',
+    }).format(date),
+    day: new Intl.DateTimeFormat('en-PH', {
+      day: '2-digit',
+      timeZone: 'Asia/Manila',
+    }).format(date),
+    time: new Intl.DateTimeFormat('en-PH', {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: 'Asia/Manila',
+    }).format(date),
+  }
 }
 
-export function UpcomingActivities() {
+export function UpcomingActivities({ compact = false }: { compact?: boolean }) {
   const { user } = useAuth()
   const role = user?.role === 'professor' ? 'professor' : 'student'
   const basePath = `/${role}/activities`
@@ -27,7 +38,7 @@ export function UpcomingActivities() {
 
   useEffect(() => {
     let active = true
-    void fetchActivities({ status: 'upcoming', per_page: 3 })
+    void fetchActivities({ status: 'upcoming', per_page: compact ? 3 : 6 })
       .then((result) => {
         if (active) setActivities(result.activities)
       })
@@ -41,34 +52,66 @@ export function UpcomingActivities() {
     return () => {
       active = false
     }
-  }, [])
+  }, [compact])
 
   return (
-    <Card className="mt-5 overflow-hidden">
-      <CardHeader className="flex items-center justify-between gap-3">
+    <Card className="overflow-hidden">
+      <CardHeader className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-coral-500" aria-hidden="true" />
-            <h2 className="font-display text-base font-semibold text-ink">Upcoming activities</h2>
+            <Sparkles className="size-4 text-gold-700" aria-hidden="true" />
+            <h2 className="text-lg font-semibold text-ink">Upcoming activities</h2>
           </div>
-          <p className="mt-1 text-xs text-ink-muted">Events for your audience</p>
+          <p className="mt-1 text-sm text-ink-muted">Events for your audience</p>
         </div>
-        <Link
-          to={basePath}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-flow-700 hover:text-flow-800"
-        >
-          View all <ArrowRight className="size-3.5" aria-hidden="true" />
-        </Link>
+        <LinkButton to={basePath} variant="ghost" size="sm" leftIcon={<ArrowRight className="size-3.5" aria-hidden="true" />}>
+          View all
+        </LinkButton>
       </CardHeader>
       {loading ? (
-        <p className="px-5 py-7 text-center text-sm text-ink-muted" role="status">Loading activities…</p>
+        <p className="px-5 py-7 text-center text-sm text-ink-muted" role="status">
+          Loading activities…
+        </p>
       ) : error ? (
-        <p className="m-5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">{error}</p>
+        <p className="m-5 rounded-md border border-[#efc7c2] bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">
+          {error}
+        </p>
       ) : activities.length ? (
         <div className="divide-y divide-line">
-          {activities.map((activity) => (
-            <UpcomingItem key={activity.id} activity={activity} basePath={basePath} />
-          ))}
+          {activities.map((activity) => {
+            const date = dateParts(activity.starts_at)
+
+            return (
+              <article key={activity.id} className="flex gap-4 px-5 py-4">
+                <div className="flex w-11 shrink-0 flex-col items-center border-r border-line pr-3">
+                  <span className="text-xs font-semibold uppercase tracking-[0.1em] text-ink-subtle">
+                    {date.month}
+                  </span>
+                  <span className="tabular text-xl font-semibold text-brand-800">{date.day}</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink-subtle">
+                    {activity.category.replace(/_/g, ' ')}
+                  </p>
+                  <h3 className="mt-1 text-sm font-semibold leading-5 text-ink">
+                    <Link to={`${basePath}/${activity.id}`} className="hover:text-brand-700">
+                      {activity.title}
+                    </Link>
+                  </h3>
+                  <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-muted">
+                    <span className="inline-flex items-center gap-1">
+                      <CalendarDays className="size-3.5" aria-hidden="true" />
+                      {date.time}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="size-3.5" aria-hidden="true" />
+                      {activity.room?.name ?? activity.venue_name ?? 'Venue to be announced'}
+                    </span>
+                  </div>
+                </div>
+              </article>
+            )
+          })}
         </div>
       ) : (
         <EmptyState
@@ -79,29 +122,5 @@ export function UpcomingActivities() {
         />
       )}
     </Card>
-  )
-}
-
-function UpcomingItem({ activity, basePath }: { activity: Activity; basePath: string }) {
-  return (
-    <article className="px-5 py-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge>{activity.category.replace(/_/g, ' ')}</Badge>
-        <Badge tone="warning">Upcoming</Badge>
-      </div>
-      <h3 className="mt-2 font-semibold text-ink">
-        <Link to={`${basePath}/${activity.id}`} className="hover:text-flow-700">
-          {activity.title}
-        </Link>
-      </h3>
-      <p className="mt-1 text-xs text-ink-muted">
-        <CalendarDays className="mr-1 inline size-3.5" aria-hidden="true" />
-        {formatDate(activity.starts_at)}
-      </p>
-      <p className="mt-1 text-xs text-ink-muted">
-        <MapPin className="mr-1 inline size-3.5" aria-hidden="true" />
-        {activity.room?.name ?? activity.venue_name ?? 'Venue details coming soon'}
-      </p>
-    </article>
   )
 }

@@ -8,10 +8,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
-      className={cn(
-        'rounded-xl border border-line bg-white shadow-[0_12px_30px_-26px_rgba(53,0,17,0.38)]',
-        className,
-      )}
+      className={cn('rounded-lg border border-line bg-surface', className)}
       {...props}
     >
       {children}
@@ -35,4 +32,8 @@ interface CardBodyProps {
 
 export function CardBody({ children, className }: CardBodyProps) {
   return <div className={cn('p-5', className)}>{children}</div>
+}
+
+export function CardFooter({ children, className }: CardBodyProps) {
+  return <div className={cn('border-t border-line px-5 py-4', className)}>{children}</div>
 }

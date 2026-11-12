@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { cn } from '@/utils/cn'
 
 interface EmptyStateProps {
   icon: LucideIcon
@@ -17,15 +18,13 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div className={className}>
-      <div className="flex flex-col items-center px-6 py-12 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl border border-flow-100 bg-flow-50 text-flow-700">
-          <Icon className="size-6" aria-hidden="true" />
-        </div>
-        <h3 className="mt-5 font-display text-lg font-semibold text-ink">{title}</h3>
-        <p className="mt-2 max-w-md text-sm leading-6 text-ink-muted">{description}</p>
-        {action ? <div className="mt-5">{action}</div> : null}
+    <div className={cn('flex flex-col items-center px-6 py-10 text-center', className)}>
+      <div className="flex size-11 items-center justify-center rounded-md border border-line bg-surface-subtle text-ink-subtle">
+        <Icon className="size-5" aria-hidden="true" />
       </div>
+      <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
+      <p className="mt-1.5 max-w-md text-sm leading-6 text-ink-muted">{description}</p>
+      {action ? <div className="mt-4">{action}</div> : null}
     </div>
   )
 }

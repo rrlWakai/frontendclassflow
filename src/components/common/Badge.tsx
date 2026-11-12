@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
-type BadgeTone = 'neutral' | 'flow' | 'coral' | 'success' | 'warning' | 'danger'
+type BadgeTone = 'neutral' | 'brand' | 'gold' | 'success' | 'warning' | 'danger' | 'info'
 
 interface BadgeProps {
   children: ReactNode
@@ -10,33 +10,24 @@ interface BadgeProps {
 }
 
 const toneStyles: Record<BadgeTone, string> = {
-  neutral: 'border-line bg-slate-50 text-ink-muted',
-  flow: 'border-flow-200 bg-flow-50 text-flow-800',
-  coral: 'border-coral-200 bg-coral-100 text-night-900',
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-  warning: 'border-amber-200 bg-amber-50 text-amber-800',
-  danger: 'border-red-200 bg-red-50 text-red-700',
-}
-
-const dotStyles: Record<BadgeTone, string> = {
-  neutral: 'bg-slate-400',
-  flow: 'bg-flow-500',
-  coral: 'bg-coral-500',
-  success: 'bg-emerald-500',
-  warning: 'bg-amber-500',
-  danger: 'bg-red-500',
+  neutral: 'border-line bg-surface-subtle text-ink-muted',
+  brand: 'border-brand-100 bg-brand-50 text-brand-800',
+  gold: 'border-gold-200 bg-[#fff9e8] text-gold-700',
+  success: 'border-[#c7ded3] bg-success-soft text-success',
+  warning: 'border-[#e9d5a6] bg-warning-soft text-warning',
+  danger: 'border-[#efc7c2] bg-danger-soft text-danger',
+  info: 'border-[#cad8e2] bg-info-soft text-info',
 }
 
 export function Badge({ children, tone = 'neutral', className }: BadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]',
+        'inline-flex items-center rounded-sm border px-2 py-0.5 text-xs font-semibold capitalize leading-5',
         toneStyles[tone],
         className,
       )}
     >
-      <span className={cn('size-1.5 rounded-full', dotStyles[tone])} aria-hidden="true" />
       {children}
     </span>
   )

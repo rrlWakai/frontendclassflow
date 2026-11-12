@@ -1,86 +1,143 @@
 import { CalendarDays, Clock3, MapPin, UserRound } from 'lucide-react'
 import { Badge } from '@/components/common/Badge'
-import { Card } from '@/components/common/Card'
 import { EmptyState } from '@/components/common/EmptyState'
 import type { MySchedule } from '@/types/scheduling'
-
-const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
-function todayDayOfWeek(): number {
-  const day = new Date().getDay()
-  return day === 0 ? 7 : day
-}
+import {
+  dayLabels,
+  formatTimeRange,
+  getManilaNow,
+  instructorNames,
+  roomLabel,
+} from '@/utils/schedule'
+import { cn } from '@/utils/cn'
 
 interface WeeklyScheduleProps {
   schedules: MySchedule[]
   loading: boolean
   error: string | null
   role: 'Professor' | 'Student'
+  className?: string
 }
 
-export function WeeklySchedule({ schedules, loading, error, role }: WeeklyScheduleProps) {
+export function WeeklySchedule({ schedules, loading, error, role, className }: WeeklyScheduleProps) {
   if (loading) {
-    return <Card className="p-8 text-center text-sm text-ink-muted">Loading your published schedule…</Card>
+    return (
+      <p role="status" className={cn('px-5 py-10 text-center text-sm text-ink-muted', className)}>
+        Loading your published timetable…
+      </p>
+    )
   }
 
   if (error) {
     return (
-      <Card className="p-5" role="alert">
-        <p className="text-sm font-semibold text-red-700">Schedule unavailable</p>
-        <p className="mt-1 text-sm text-ink-muted">{error}</p>
-      </Card>
+      <div role="alert" className={cn('px-5 py-8', className)}>
+        <p className="text-sm font-semibold text-danger">Schedule unavailable</p>
+        <p className="mt-1 text-sm leading-6 text-ink-muted">{error}</p>
+      </div>
     )
   }
 
   if (schedules.length === 0) {
     return (
-      <Card>
-        <EmptyState
-          icon={CalendarDays}
-          title="No published classes yet"
-          description="Published class meetings connected to your account will appear here."
-        />
-      </Card>
+      <EmptyState
+        icon={CalendarDays}
+        title="No published classes yet"
+        description="Published class meetings connected to your account will appear here."
+        className={className}
+      />
     )
   }
 
-  const sorted = [...schedules].sort((a, b) =>
-    a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time),
-  )
+  const today = getManilaNow().dayOfWeek
+  const grouped = dayLabels
+    .map((label, index) => ({
+      day: index + 1,
+      label,
+      meetings: schedules
+        .filter((schedule) => schedule.day_of_week === index + 1)
+        .sort((left, right) => left.start_time.localeCompare(right.start_time)),
+    }))
+    .filter((group) => group.meetings.length > 0)
 
   return (
-    <div className="space-y-3">
-      {sorted.map((schedule) => {
-        const room = schedule.room_allocations.find((allocation) => allocation.status === 'active')?.room
-        const instructors = schedule.assignments
-          .filter((assignment) => assignment.status === 'active')
-          .map((assignment) => assignment.professor.name)
-          .join(', ')
+    <div className={cn('divide-y divide-line', className)}>
+      {grouped.map(({ day, label, meetings }) => {
+        const isToday = day === today
 
         return (
-          <Card key={schedule.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="font-semibold text-ink">
-                {schedule.offering.subject.code} · {schedule.offering.subject.title}
-              </p>
-              <p className="mt-1 text-xs text-ink-muted">
-                {schedule.offering.section.code} · {schedule.offering.academic_term.name} {schedule.offering.academic_term.academic_year}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-ink-muted">
-                {role === 'Student' && instructors ? <span className="inline-flex items-center gap-1.5"><UserRound className="size-3.5" aria-hidden="true" />{instructors}</span> : null}
-                <span className="inline-flex items-center gap-1.5"><MapPin className="size-3.5" aria-hidden="true" />{room ? `${room.code}${room.building ? ` · ${room.building}` : ''}` : schedule.modality.replaceAll('_', ' ')}</span>
-              </div>
+          <section
+            key={day}
+            className={cn('grid gap-3 px-5 py-4 sm:grid-cols-[7.5rem_minmax(0,1fr)]', isToday && 'bg-brand-50/60')}
+            aria-labelledby={`schedule-day-${day}`}
+          >
+            <div>
+              <h3
+                id={`schedule-day-${day}`}
+                className={cn(
+                  'text-sm font-semibold',
+                  isToday ? 'text-brand-800' : 'text-ink',
+                )}
+              >
+                {label}
+              </h3>
+              {isToday ? (
+                <span className="mt-1 inline-block text-xs font-semibold uppercase tracking-[0.1em] text-gold-700">
+                  Today
+                </span>
+              ) : (
+                <span className="mt-1 block text-xs text-ink-subtle">
+                  {meetings.length} meeting{meetings.length === 1 ? '' : 's'}
+                </span>
+              )}
             </div>
-            <div className="flex shrink-0 items-center gap-3">
-              <div className="text-right">
-                <p className="text-sm font-semibold text-ink">{dayLabels[schedule.day_of_week - 1]}{schedule.day_of_week === todayDayOfWeek() ? <Badge tone="coral" className="ml-2">Today</Badge> : null}</p>
-                <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-ink-muted"><Clock3 className="size-3.5" aria-hidden="true" />{schedule.start_time}–{schedule.end_time}</p>
-              </div>
-              <Badge tone={schedule.modality === 'online' ? 'flow' : 'neutral'}>{schedule.modality.replaceAll('_', ' ')}</Badge>
-            </div>
-          </Card>
+
+            <ol className="space-y-2">
+              {meetings.map((schedule) => {
+                const instructor = instructorNames(schedule)
+
+                return (
+                  <li
+                    key={schedule.id}
+                    className="grid gap-2 border-l-2 border-line pl-3 sm:grid-cols-[7.5rem_minmax(0,1fr)_auto] sm:items-center"
+                  >
+                    <p className="tabular text-xs font-semibold text-ink-muted">
+                      {formatTimeRange(schedule.start_time, schedule.end_time)}
+                    </p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-ink">
+                        {schedule.offering.subject.code} · {schedule.offering.subject.title}
+                      </p>
+                      <p className="mt-0.5 text-xs text-ink-muted">
+                        {schedule.offering.section.code} · {schedule.offering.academic_term.name}{' '}
+                        {schedule.offering.academic_term.academic_year}
+                      </p>
+                      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-muted">
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="size-3.5" aria-hidden="true" />
+                          {roomLabel(schedule)}
+                        </span>
+                        {role === 'Student' && instructor ? (
+                          <span className="inline-flex items-center gap-1">
+                            <UserRound className="size-3.5" aria-hidden="true" />
+                            {instructor}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <Badge tone={schedule.modality === 'online' ? 'info' : 'neutral'}>
+                      {schedule.modality.replaceAll('_', ' ')}
+                    </Badge>
+                  </li>
+                )
+              })}
+            </ol>
+          </section>
         )
       })}
+      <p className="flex items-center gap-2 px-5 py-3 text-xs text-ink-muted">
+        <Clock3 className="size-3.5" aria-hidden="true" />
+        All times are in Asia/Manila.
+      </p>
     </div>
   )
 }
