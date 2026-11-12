@@ -50,7 +50,7 @@ function AnnouncementListCard({
           </Badge>
         ) : null}
       </div>
-      <h2 className="mt-3 font-display text-lg font-semibold leading-6 text-ink">
+      <h2 className="mt-3 text-lg font-semibold leading-6 text-ink">
         <Link
           to={`${detailBase}/${announcement.id}`}
           className="rounded-sm hover:text-flow-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-600"

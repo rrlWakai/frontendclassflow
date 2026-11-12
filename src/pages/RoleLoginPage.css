@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @property --spot-x {
   syntax: '<percentage>';
@@ -21,7 +21,7 @@
   overflow: hidden;
   background: #060304;
   color: #efe6e1;
-  font-family: 'Hanken Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .classflow-login--professor {
@@ -69,10 +69,10 @@
 
 .classflow-login__brand {
   color: #efe6e1;
-  font-family: 'Bodoni Moda', Georgia, serif;
+  font-family: 'Inter', sans-serif;
   font-size: 22px;
-  font-weight: 500;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   line-height: 1;
   text-decoration: none;
 }
@@ -99,11 +99,11 @@
 .classflow-login__welcome {
   margin: 0 0 24px;
   color: #c4b8b3;
-  font-family: 'Bodoni Moda', Georgia, serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(22px, 2.3vw, 30px);
   font-style: italic;
   font-weight: 400;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
 .classflow-login__role-tabs {
@@ -121,10 +121,10 @@
   background: transparent;
   color: rgb(239 230 225 / 28%);
   cursor: pointer;
-  font-family: 'Bodoni Moda', Georgia, serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(48px, 8.2vw, 112px);
-  font-weight: 400;
-  letter-spacing: -0.065em;
+  font-weight: 700;
+  letter-spacing: -0.04em;
   line-height: 1.08;
   text-align: left;
   transition: color 250ms ease;
@@ -498,7 +498,7 @@
 
   .classflow-login__form-section {
     max-width: none;
-    justify-self: stretch;
+    justify-self: stretch.
   }
 
   .classflow-login__form {
@@ -512,15 +512,15 @@
 
 @media (max-width: 380px) {
   .classflow-login__shell {
-    width: min(100% - 36px, 460px);
+    width: min(100% - 36px, 460px).
   }
 
   .classflow-login__main {
-    gap: 30px;
+    gap: 30px.
   }
 
   .classflow-login__role-tab {
-    font-size: clamp(48px, 14.5vw, 58px);
+    font-size: clamp(48px, 14.5vw, 58px).
   }
 }
 

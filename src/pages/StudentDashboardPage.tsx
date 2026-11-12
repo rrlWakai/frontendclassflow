@@ -120,7 +120,7 @@ export function StudentDashboardPage() {
                           : dayLabels[upcoming.schedule.day_of_week - 1]}
                     </span>
                   </div>
-                  <p className="mt-4 font-display text-2xl font-medium leading-tight tracking-[-0.02em] text-ink sm:text-3xl">
+                  <p className="mt-4 text-2xl font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-3xl">
                     {upcoming.schedule.offering.subject.code} ·{' '}
                     {upcoming.schedule.offering.subject.title}
                   </p>
@@ -179,7 +179,7 @@ export function StudentDashboardPage() {
               </Alert>
             ) : attendanceSummary && attendanceSummary.summary.total > 0 && rate !== null ? (
               <>
-                <p className="tabular font-display text-4xl font-medium leading-none text-brand-800">
+                <p className="tabular text-4xl font-bold leading-none text-brand-800">
                   {rate}%
                 </p>
                 <p className="mt-2 text-sm text-ink-muted">

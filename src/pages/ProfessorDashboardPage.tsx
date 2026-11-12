@@ -97,7 +97,7 @@ export function ProfessorDashboardPage() {
                   <Icon className="size-[18px]" aria-hidden="true" />
                 </span>
               </div>
-              <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-ink">
+              <p className="mt-3 text-3xl font-semibold tracking-tight text-ink">
                 {stat.label === 'Active classes' ? schedules.length.toString() : stat.value}
               </p>
               <p className="mt-1 text-xs text-ink-muted">{stat.hint}</p>
@@ -110,7 +110,7 @@ export function ProfessorDashboardPage() {
         <Card className="p-5">
           <CardHeader className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="font-display text-base font-semibold text-ink">Teaching queue</h2>
+              <h2 className="text-base font-semibold text-ink">Teaching queue</h2>
               <p className="mt-0.5 text-xs text-ink-muted">Your published weekly classes</p>
             </div>
             <Badge tone={schedules.length ? 'success' : 'neutral'}>{schedules.length} classes</Badge>
@@ -128,7 +128,7 @@ export function ProfessorDashboardPage() {
                 <Clock className="size-4 text-flow-600" aria-hidden="true" />
               </div>
             </div>
-            <p className="mt-3 font-display text-lg font-semibold leading-7 text-ink">
+            <p className="mt-3 text-lg font-semibold leading-7 text-ink">
               {formatLongDate()}
             </p>
             {todaysSchedules.length ? (
@@ -171,7 +171,7 @@ export function ProfessorDashboardPage() {
 
       <Card className="mt-5">
         <CardHeader>
-          <h2 className="font-display text-base font-semibold text-ink">Foundation status</h2>
+          <h2 className="text-base font-semibold text-ink">Foundation status</h2>
           <p className="mt-0.5 text-xs text-ink-muted">
             What is ready now versus what Phase 2 adds
           </p>

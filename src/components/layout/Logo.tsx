@@ -33,7 +33,7 @@ export function Logo({ variant = 'onDark', compact = false, className }: LogoPro
         <div className="min-w-0 leading-none">
           <p
             className={cn(
-              'font-display text-xl font-medium tracking-[-0.03em]',
+              'text-xl font-medium tracking-[-0.03em]',
               onDark ? 'text-white' : 'text-ink',
             )}
           >

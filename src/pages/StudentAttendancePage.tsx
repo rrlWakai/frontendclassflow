@@ -143,7 +143,7 @@ export function StudentAttendancePage() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
               {label}
             </p>
-            <p className="mt-2 font-display text-2xl font-semibold text-ink">{value}</p>
+            <p className="mt-2 text-2xl font-semibold text-ink">{value}</p>
           </Card>
         ))}
       </div>
@@ -151,7 +151,7 @@ export function StudentAttendancePage() {
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.8fr)_minmax(18rem,0.8fr)]">
         <Card className="min-w-0">
           <CardHeader>
-            <h2 className="font-display text-base font-semibold text-ink">Attendance history</h2>
+            <h2 className="text-base font-semibold text-ink">Attendance history</h2>
             <p className="mt-1 text-xs text-ink-muted">
               Historical records remain available if a class schedule is later cancelled.
             </p>
@@ -350,7 +350,7 @@ export function StudentAttendancePage() {
 
         <Card className="p-5">
           <CardHeader>
-            <h2 className="font-display text-base font-semibold text-ink">By subject</h2>
+            <h2 className="text-base font-semibold text-ink">By subject</h2>
             <p className="mt-1 text-xs text-ink-muted">Submitted attendance records only</p>
           </CardHeader>
           {isLoading ? (

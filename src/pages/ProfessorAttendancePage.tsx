@@ -333,7 +333,7 @@ export function ProfessorAttendancePage() {
         <div className="space-y-5">
           <Card className="p-5">
             <CardHeader>
-              <h2 className="font-display text-base font-semibold text-ink">Start a class session</h2>
+              <h2 className="text-base font-semibold text-ink">Start a class session</h2>
               <p className="mt-1 text-xs leading-5 text-ink-muted">
                 Only your assigned published schedules are available.
               </p>
@@ -388,7 +388,7 @@ export function ProfessorAttendancePage() {
 
           <Card className="p-5">
             <CardHeader>
-              <h2 className="font-display text-base font-semibold text-ink">My sessions</h2>
+              <h2 className="text-base font-semibold text-ink">My sessions</h2>
             </CardHeader>
             {isLoadingSessions ? (
               <p role="status" className="py-8 text-center text-sm text-ink-muted">Loading sessions…</p>
@@ -455,7 +455,7 @@ export function ProfessorAttendancePage() {
                   <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
                     {detail.session.class_date} · {detail.session.offering.academic_term.name}
                   </p>
-                  <h2 className="mt-1 font-display text-xl font-semibold text-ink">
+                  <h2 className="mt-1 text-xl font-semibold text-ink">
                     {detail.session.offering.subject.code} · {detail.session.offering.section.code}
                   </h2>
                   <p className="mt-1 text-sm text-ink-muted">
@@ -497,7 +497,7 @@ export function ProfessorAttendancePage() {
                     <span className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-muted">
                       Attendance progress
                     </span>
-                    <span className="font-display text-sm font-semibold text-ink">
+                    <span className="text-sm font-semibold text-ink">
                       {attendanceCounts().marked} of {attendanceCounts().total} marked
                     </span>
                   </div>

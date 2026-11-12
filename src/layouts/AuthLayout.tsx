@@ -84,7 +84,7 @@ export function AuthLayout({ role, children }: AuthLayoutProps) {
             {theme.label}
           </span>
 
-          <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.12] tracking-[-0.03em] text-white xl:text-[2.9rem]">
+          <h1 className="mt-6 text-4xl font-bold leading-[1.12] tracking-[-0.03em] text-white xl:text-[2.9rem]">
             {theme.headline}
           </h1>
           <p className="mt-5 max-w-lg text-[15px] leading-7 text-white/55">

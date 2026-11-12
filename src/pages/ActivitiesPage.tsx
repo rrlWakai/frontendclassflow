@@ -185,7 +185,7 @@ function ActivityListCard({ activity, detailBase }: { activity: Activity; detail
         <Badge>{activity.category.replace(/_/g, ' ')}</Badge>
         <Badge tone={activityTone(activity.activity_state)}>{activity.activity_state}</Badge>
       </div>
-      <h2 className="mt-3 font-display text-lg font-semibold leading-6 text-ink">
+      <h2 className="mt-3 text-lg font-semibold leading-6 text-ink">
         <Link to={`${detailBase}/${activity.id}`} className="hover:text-flow-700">{activity.title}</Link>
       </h2>
       <p className="mt-1 text-xs text-ink-muted">{activity.organizer_name}</p>

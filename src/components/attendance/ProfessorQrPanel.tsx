@@ -166,7 +166,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-flow-700">
             QR attendance
           </p>
-          <h2 className="mt-1 font-display text-lg font-semibold text-ink">
+          <h2 className="mt-1 text-lg font-semibold text-ink">
             {session.offering.subject.code} - {session.offering.section.code}
           </h2>
           <p className="mt-1 text-xs text-ink-muted">
@@ -256,7 +256,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
                           </p>
                           <Icon className="size-4 text-flow-600" aria-hidden="true" />
                         </div>
-                        <p className="mt-2 font-display text-2xl font-semibold text-ink">{value}</p>
+                        <p className="mt-2 text-2xl font-semibold text-ink">{value}</p>
                       </div>
                     ))}
                   </div>
@@ -333,7 +333,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
             <div className="flex size-14 items-center justify-center rounded-2xl border border-flow-100 bg-flow-50 text-flow-700">
               <QrCode className="size-7" aria-hidden="true" />
             </div>
-            <h3 className="mt-4 font-display text-lg font-semibold text-ink">
+            <h3 className="mt-4 text-lg font-semibold text-ink">
               {sessionOpen ? 'QR attendance is not active' : 'This session cannot accept QR check-ins'}
             </h3>
             <p className="mt-2 max-w-md text-sm leading-6 text-ink-muted">

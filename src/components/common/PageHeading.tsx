@@ -12,7 +12,7 @@ export function PageHeading({ eyebrow, title, description, actions }: PageHeadin
     <header className="flex flex-col gap-5 border-b border-line pb-6 sm:pb-7 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0 max-w-3xl">
         {eyebrow ? <p className="eyebrow mb-3">{eyebrow}</p> : null}
-        <h1 className="font-display text-3xl font-medium leading-[1.12] tracking-[-0.025em] text-ink sm:text-4xl">
+        <h1 className="text-3xl font-medium leading-[1.12] tracking-[-0.025em] text-ink sm:text-4xl">
           {title}
         </h1>
         {description ? (

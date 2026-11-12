@@ -37,7 +37,7 @@ export function StudentScheduleConflicts({ compact = false }: { compact?: boolea
     <Card className="mt-5 overflow-hidden">
       <CardHeader className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-display text-base font-semibold text-ink">
+          <h2 className="text-base font-semibold text-ink">
             {compact ? 'Schedule conflicts' : 'Schedule conflicts'}
           </h2>
           <p className="mt-1 text-xs text-ink-muted">

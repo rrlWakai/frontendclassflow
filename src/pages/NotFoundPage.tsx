@@ -16,10 +16,10 @@ export function NotFoundPage() {
               <Compass className="size-6" aria-hidden="true" />
             </span>
           </div>
-          <p className="mt-5 font-display text-6xl font-semibold tracking-[-0.04em] text-flow-600/20">
+          <p className="mt-5 text-6xl font-bold tracking-[-0.04em] text-flow-600/20">
             404
           </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold tracking-[-0.02em] text-ink">
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.02em] text-ink">
             This page isn&apos;t in the flow.
           </h1>
           <p className="mt-3 text-sm leading-6 text-ink-muted">

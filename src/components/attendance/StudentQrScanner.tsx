@@ -319,7 +319,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
         <div className="flex size-16 items-center justify-center rounded-full bg-coral-100 text-coral-600 mx-auto mb-4">
           <QrCode className="size-8" aria-hidden="true" />
         </div>
-        <h3 className="font-display text-lg font-semibold text-ink">Ready to scan</h3>
+        <h3 className="text-lg font-semibold text-ink">Ready to scan</h3>
         <p className="max-w-sm mx-auto text-sm leading-6 text-ink-muted">
           Position the QR code inside the scanning frame. Make sure your camera has permission to access this feature.
         </p>
@@ -349,7 +349,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-coral-600">
           <Key className="size-4" aria-hidden="true" />
-          <h3 className="font-display text-lg font-semibold text-ink">Enter code manually</h3>
+          <h3 className="text-lg font-semibold text-ink">Enter code manually</h3>
         </div>
         <p className="text-sm leading-6 text-ink-muted">
           Type the QR attendance code shown by your Professor and submit it to check in.
@@ -404,7 +404,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
           {phase === 'requesting' ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-night-950/85 px-6 text-center text-white">
               <LoaderCircle className="size-9 animate-spin text-flow-300" aria-hidden="true" />
-              <p className="mt-4 font-display text-lg font-semibold">Waiting for camera permission</p>
+              <p className="mt-4 text-lg font-semibold">Waiting for camera permission</p>
               <p className="mt-2 max-w-sm text-sm leading-6 text-white/70">
                 Approve camera access to begin scanning. Camera access requires HTTPS or localhost.
               </p>
@@ -469,7 +469,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
     scannerContent = (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-line bg-canvas/60 px-6 py-14 text-center">
         <LoaderCircle className="size-9 animate-spin text-flow-600" aria-hidden="true" />
-        <h3 className="mt-4 font-display text-lg font-semibold text-ink">Verifying attendance</h3>
+        <h3 className="mt-4 text-lg font-semibold text-ink">Verifying attendance</h3>
         <p className="mt-2 max-w-sm text-sm leading-6 text-ink-muted">
           Checking the QR token, session status, and your enrollment.
         </p>
@@ -481,7 +481,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
         <div className="flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
           <CheckCircle2 className="size-8" aria-hidden="true" />
         </div>
-        <h3 className="mt-4 font-display text-xl font-semibold text-emerald-900">Attendance recorded</h3>
+        <h3 className="mt-4 text-xl font-semibold text-emerald-900">Attendance recorded</h3>
         <p className="mt-2 max-w-sm text-sm leading-6 text-emerald-800">
           {result.session.offering.subject.code} - {result.session.offering.section.code} on{' '}
           {result.session.class_date}.
@@ -526,7 +526,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
             <AlertTriangle className="size-7" aria-hidden="true" />
           )}
         </div>
-        <h3 className="mt-4 font-display text-xl font-semibold text-red-900">{failureCopy.title}</h3>
+        <h3 className="mt-4 text-xl font-semibold text-red-900">{failureCopy.title}</h3>
         <p className="mt-2 max-w-md text-sm leading-6 text-red-800">{failureCopy.message}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           {failure?.code !== 'already_recorded' && !manualEntry ? (
@@ -579,7 +579,7 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-coral-600">
               QR check-in
             </p>
-            <h2 className="mt-1 font-display text-lg font-semibold text-ink">
+            <h2 className="mt-1 text-lg font-semibold text-ink">
               Scan your Professor&apos;s QR code
             </h2>
             <p className="mt-1 text-xs text-ink-muted">

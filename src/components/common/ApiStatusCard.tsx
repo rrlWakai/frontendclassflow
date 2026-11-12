@@ -34,7 +34,7 @@ export function ApiStatusCard() {
         </p>
         <span className={cn('size-2 rounded-full', dot)} aria-hidden="true" />
       </div>
-      <p className="mt-3 font-display text-lg font-semibold text-ink">{label}</p>
+      <p className="mt-3 text-lg font-semibold text-ink">{label}</p>
       <p className="mt-1 text-xs leading-5 text-ink-muted">{detail}</p>
     </Card>
   )
