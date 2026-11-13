@@ -91,7 +91,8 @@ export function StudentAttendancePage() {
   return (
     <div>
       <PageHeading
-        title="My attendance"
+        title="Attendance"
+        description="Review your attendance and class check-ins."
         actions={(
           <div className="flex flex-wrap items-center gap-2">
             <Button

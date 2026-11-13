@@ -314,10 +314,11 @@ export function ProfessorAttendancePage() {
     })
   }
 
-  return (
+return (
     <div>
       <PageHeading
         title="Attendance"
+        description="Manage class sessions and record attendance."
         actions={<Badge tone="flow">My classes</Badge>}
       />
 

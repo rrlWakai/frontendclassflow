@@ -122,6 +122,7 @@ function AnnouncementsPage({ role }: AnnouncementsPageProps) {
     <>
       <PageHeading
         title="Announcements"
+        description="Important updates from your professors."
       />
       {error ? (
         <p className="mb-5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700" role="alert">

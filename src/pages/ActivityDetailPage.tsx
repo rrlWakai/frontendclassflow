@@ -63,7 +63,11 @@ export function ActivityDetailPage() {
   if (error || !activity) {
     return (
       <>
-        <PageHeading eyebrow="Activities" title="Activity unavailable" />
+        <PageHeading
+          eyebrow="Activities"
+          title="Activity unavailable"
+          description={error ?? 'It may not be published or may not be intended for your account.'}
+        />
         <Card>
           <EmptyState
             icon={Sparkles}
@@ -86,7 +90,11 @@ export function ActivityDetailPage() {
         <ArrowLeft className="size-4" aria-hidden="true" />
         All activities
       </Link>
-      <PageHeading eyebrow="CCS activity" title={activity.title} />
+      <PageHeading
+        eyebrow="CCS activity"
+        title={activity.title}
+        description="View the full activity details."
+      />
       <Card>
         <CardBody>
           <div className="flex flex-wrap items-center gap-2">

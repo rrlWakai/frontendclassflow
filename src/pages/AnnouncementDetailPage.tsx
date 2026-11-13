@@ -71,7 +71,11 @@ export function AnnouncementDetailPage() {
   if (!valid) {
     return (
       <>
-        <PageHeading eyebrow="Announcements" title="Announcement unavailable" />
+        <PageHeading
+          eyebrow="Announcements"
+          title="Announcement unavailable"
+          description="This announcement could not be found."
+        />
         <Card>
           <EmptyState
             icon={Megaphone}
@@ -108,7 +112,11 @@ export function AnnouncementDetailPage() {
   if (error || !announcement) {
     return (
       <>
-        <PageHeading eyebrow="Announcements" title="Announcement unavailable" />
+        <PageHeading
+          eyebrow="Announcements"
+          title="Announcement unavailable"
+          description={error ?? 'It may have expired or may not be targeted to your account.'}
+        />
         <Card>
           <EmptyState
             icon={Megaphone}
@@ -139,7 +147,11 @@ export function AnnouncementDetailPage() {
           All announcements
         </Link>
       </div>
-      <PageHeading eyebrow="Announcement" title={announcement.title} />
+      <PageHeading
+        eyebrow="Announcement"
+        title={announcement.title}
+        description="View the full announcement details."
+      />
       <Card>
         <CardBody>
           <div className="flex flex-wrap items-center gap-2">

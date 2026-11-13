@@ -17,6 +17,7 @@ import { useSchedules } from '@/hooks/useSchedules'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/utils/cn'
 import { formatLongDate } from '@/utils/format'
+import { getManilaNow } from '@/utils/schedule'
 
 interface StatItem {
   label: string
@@ -51,6 +52,9 @@ export function ProfessorDashboardPage() {
   const { schedules, loading: schedulesLoading, error: schedulesError } = useSchedules()
   const navigate = useNavigate()
   const firstName = user?.name.split(' ')[0] ?? 'Professor'
+  const now = getManilaNow()
+  const hour = Math.floor(now.minutes / 60)
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
   const todayDay = new Date().getDay()
   const todayDayOfWeek = todayDay === 0 ? 7 : todayDay
@@ -60,7 +64,10 @@ export function ProfessorDashboardPage() {
   return (
     <div>
       <PageHeading
-        title={`Good day, ${firstName}.`}
+        variant="dashboard"
+        title={`${greeting}, ${firstName}.`}
+        highlightName={firstName}
+        description="Your teaching overview, all in one place."
         actions={<Badge tone="flow">Faculty</Badge>}
       />
 

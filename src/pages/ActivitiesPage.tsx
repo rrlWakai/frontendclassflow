@@ -111,7 +111,8 @@ export function ActivitiesPage() {
   return (
     <>
       <PageHeading
-        title="CCS activities"
+        title="Activities"
+        description="View activities and upcoming deadlines."
       />
       <Card className="mb-5">
         <form

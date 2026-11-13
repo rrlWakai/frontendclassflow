@@ -77,7 +77,10 @@ export function StudentDashboardPage() {
   return (
     <div>
       <PageHeading
+        variant="dashboard"
         title={`${greeting}, ${firstName}.`}
+        highlightName={firstName}
+        description="Your academic overview, all in one place."
         actions={
           <LinkButton
             to="/student/attendance"
