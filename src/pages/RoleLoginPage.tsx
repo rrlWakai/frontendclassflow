@@ -4,7 +4,6 @@ import {
   AlertCircle,
   ArrowRight,
   BriefcaseBusiness,
-  Check,
   ExternalLink,
   Eye,
   EyeOff,
@@ -51,26 +50,17 @@ const roles: {
   role: ClassFlowRole
   label: string
   icon: typeof GraduationCap
-  note: string
 }[] = [
   {
     role: 'student',
     label: 'Student',
     icon: GraduationCap,
-    note: 'Use your institutional email. Class schedules, attendance records, and announcements stay in sync with your enrolled sections.',
   },
   {
     role: 'professor',
     label: 'Professor',
     icon: BriefcaseBusiness,
-    note: 'Faculty accounts require administrator approval before sign-in. Registration corrections can be resubmitted from the account form.',
   },
-]
-
-const highlights = [
-  'Section rosters and class schedules',
-  'Session attendance and QR check-in',
-  'Class announcements and activities',
 ]
 
 const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || '/admin'
@@ -91,8 +81,6 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const focusTabAfterNavigation = useRef(false)
   const roleTabRefs = useRef<Partial<Record<ClassFlowRole, HTMLButtonElement>>>({})
-
-  const activeRole = roles.find((option) => option.role === role) ?? roles[0]
 
   useEffect(() => {
     if (!focusTabAfterNavigation.current) {
@@ -213,41 +201,21 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
             </Link>
 
             <div className="cf-auth__showcase-body">
-              <p className="cf-auth__eyebrow">CCSync Academic Platform</p>
-              <h1 className="cf-auth__headline">
-                The academic day for Computer Studies, kept in one calm place.
-              </h1>
-              <p className="cf-auth__description">
-                ClassFlow brings class schedules, attendance, and coursework
-                communication together for CCS faculty and students, aligned to the
-                sections and terms the college already runs.
-              </p>
-
-              <ul className="cf-auth__points">
-                {highlights.map((item) => (
-                  <li key={item}>
-                    <Check aria-hidden="true" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="cf-auth__showcase-foot">
-              <span>Lyceum of the Philippines University</span>
-              <span className="cf-auth__dot" aria-hidden="true" />
-              <span>San Pablo City Campus</span>
+              <p className="cf-auth__headline">The academic day, in one calm place.</p>
             </div>
           </div>
         </aside>
 
         <div className="cf-auth__panel">
-          <div className="cf-auth__panel-inner">
+          <div
+            className={
+              isRegistering
+                ? 'cf-auth__panel-inner cf-auth__panel-inner--registration'
+                : 'cf-auth__panel-inner'
+            }
+          >
             <div className="cf-auth__compact-brand">
               <Link to="/">ClassFlow</Link>
-              <span className="cf-auth__compact-campus">
-                CCS · LSPU San Pablo City Campus
-              </span>
             </div>
 
             <section
@@ -261,12 +229,7 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
                 <RegistrationForm onBack={closeRegistration} />
               ) : (
                 <>
-                  <h1 className="cf-auth__heading">
-                    Welcome to ClassFlow
-                  </h1>
-                  <p className="cf-auth__subheading">
-                    Sign in with the email issued by the college to continue.
-                  </p>
+                  <h1 className="cf-auth__heading">Welcome to ClassFlow</h1>
 
                   <div
                     className="cf-auth__tabs"
@@ -301,8 +264,6 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
                       )
                     })}
                   </div>
-
-                  <p className="cf-auth__role-note">{activeRole.note}</p>
 
                   <form
                     className="cf-auth__form"
@@ -403,7 +364,7 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
                           }))
                         }
                       />
-                      <span>Keep me signed in on this device</span>
+                      <span>Remember me</span>
                     </label>
 
                     <div aria-live="polite">
@@ -443,11 +404,6 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
                         Create an account
                       </button>
                     </div>
-
-                    <p className="cf-auth__hint">
-                      Student accounts activate immediately. Professor accounts are
-                      reviewed by an administrator before first sign-in.
-                    </p>
                   </form>
                 </>
               )}

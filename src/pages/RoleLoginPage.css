@@ -56,6 +56,12 @@
   margin-block: auto;
 }
 
+.cf-auth__panel-inner--registration {
+  max-width: 440px;
+}
+
+/* ---------------------------------------------------------- compact brand --- */
+
 .cf-auth__compact-brand {
   display: flex;
   align-items: center;
@@ -71,13 +77,6 @@
   font-weight: 600;
   letter-spacing: -0.015em;
   text-decoration: none;
-}
-
-.cf-auth__compact-campus {
-  color: var(--cf-ink-muted);
-  font-size: 12px;
-  letter-spacing: 0.01em;
-  text-align: right;
 }
 
 /* -------------------------------------------------------------- showcase --- */
@@ -174,92 +173,14 @@
   margin-top: 56px;
 }
 
-.cf-auth__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  color: rgb(255 248 244 / 68%);
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.cf-auth__eyebrow::before {
-  width: 26px;
-  height: 1px;
-  background: var(--cf-rose);
-  content: '';
-}
-
 .cf-auth__headline {
-  margin: 18px 0 0;
+  margin: 0;
   color: #fff8f4;
   font-family: var(--cf-serif);
-  font-size: clamp(30px, 3vw, 42px);
+  font-size: clamp(28px, 2.8vw, 38px);
   font-weight: 400;
   letter-spacing: -0.015em;
-  line-height: 1.14;
-}
-
-.cf-auth__description {
-  max-width: 34ch;
-  margin: 18px 0 0;
-  color: rgb(255 248 244 / 76%);
-  font-size: 14.5px;
-  line-height: 1.68;
-}
-
-.cf-auth__points {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 22px;
-  margin: 28px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cf-auth__points li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: rgb(255 248 244 / 82%);
-  font-size: 12.5px;
-  letter-spacing: 0.005em;
-}
-
-.cf-auth__points svg {
-  width: 14px;
-  height: 14px;
-  flex: none;
-  color: var(--cf-rose);
-}
-
-.cf-auth__showcase-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
-  margin-top: 44px;
-  border-top: 1px solid rgb(255 248 244 / 14%);
-  padding-top: 20px;
-  color: rgb(255 248 244 / 58%);
-  font-size: 11.5px;
-  letter-spacing: 0.02em;
-}
-
-.cf-auth__showcase-foot span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.cf-auth__dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 999px;
-  background: rgb(255 248 244 / 34%);
+  line-height: 1.16;
 }
 
 /* ----------------------------------------------------------------- card --- */
@@ -347,13 +268,6 @@
   outline-offset: 2px;
 }
 
-.cf-auth__role-note {
-  margin: -6px 0 0;
-  color: var(--cf-ink-soft);
-  font-size: 12.5px;
-  line-height: 1.6;
-}
-
 /* ------------------------------------------------------ account type cards --- */
 
 .cf-auth__account-types {
@@ -366,12 +280,12 @@
 .cf-auth__account-type {
   display: flex;
   min-width: 0;
-  min-height: 64px;
+  min-height: 58px;
   align-items: center;
   gap: 10px;
   border: 1px solid var(--cf-line-strong);
   border-radius: 10px;
-  padding: 11px 12px;
+  padding: 9px 12px;
   background: var(--cf-cream);
   color: var(--cf-ink-soft);
   cursor: pointer;
@@ -386,8 +300,8 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border: 1px solid var(--cf-line);
   border-radius: 8px;
   background: var(--cf-parchment);
@@ -960,7 +874,6 @@ select.cf-auth__input {
   justify-content: space-between;
   gap: 6px 14px;
   width: 100%;
-  max-width: 420px;
   margin: 28px auto 0;
   color: var(--cf-ink-muted);
   font-size: 11.5px;
@@ -1025,14 +938,6 @@ select.cf-auth__input {
   .cf-auth__showcase-body {
     max-width: 34rem;
   }
-
-  .cf-auth__headline {
-    font-size: 24px;
-  }
-
-  .cf-auth__points {
-    display: none;
-  }
 }
 
 @media (min-width: 640px) {
@@ -1055,10 +960,6 @@ select.cf-auth__input {
     margin-top: 48px;
   }
 
-  .cf-auth__headline {
-    font-size: clamp(30px, 2.6vw, 40px);
-  }
-
   .cf-auth__panel {
     padding: 44px 48px;
   }
@@ -1069,6 +970,10 @@ select.cf-auth__input {
 
   .cf-auth__panel-inner {
     max-width: 404px;
+  }
+
+  .cf-auth__panel-inner--registration {
+    max-width: 520px;
   }
 }
 
