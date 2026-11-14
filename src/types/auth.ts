@@ -16,7 +16,7 @@ export interface StudentProfile {
 
 export interface ProfessorProfile {
   type: 'professor'
-  employeeNumber: string
+  employeeNumber: string | null
   employmentType: string
   specialization: string | null
   program: ProgramSummary | null

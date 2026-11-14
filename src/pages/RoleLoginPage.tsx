@@ -3,6 +3,7 @@ import type { FormEvent, KeyboardEvent } from 'react'
 import { ArrowRight, Eye, EyeOff, ExternalLink, LockKeyhole, Mail } from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { RegistrationForm } from '@/components/auth/RegistrationForm'
 import type { ClassFlowRole, LoginCredentials } from '@/types/auth'
 import { getApiErrorMessage } from '@/utils/apiError'
 import './RoleLoginPage.css'
@@ -53,6 +54,7 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
   })
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isRegistering, setIsRegistering] = useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 })
   const focusTabAfterNavigation = useRef(false)
@@ -171,7 +173,7 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
   }
 
   return (
-    <div className={`classflow-login classflow-login--${role}`}>
+    <div className={`classflow-login classflow-login--${role}${isRegistering ? ' classflow-login--register' : ''}`}>
       <div className="classflow-login__shell">
         <header className="classflow-login__header">
           <Link to="/" className="classflow-login__brand" aria-label="ClassFlow home">
@@ -235,11 +237,15 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
             tabIndex={-1}
             aria-labelledby={`classflow-role-tab-${role}`}
           >
-            <form
-              className="classflow-login__form"
-              onSubmit={handleSubmit}
-              aria-busy={isSubmitting}
-            >
+            {isRegistering ? (
+              <RegistrationForm onBack={() => setIsRegistering(false)} />
+            ) : (
+              <>
+              <form
+                className="classflow-login__form"
+                onSubmit={handleSubmit}
+                aria-busy={isSubmitting}
+              >
               <div className="classflow-login__field">
                 <label htmlFor="classflow-email">School email</label>
                 <div className="classflow-login__text-input">
@@ -249,7 +255,7 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
                     name="email"
                     type="email"
                     autoComplete="username"
-                    placeholder="you@ccsync.edu"
+                    placeholder="you@lspu.edu.ph"
                     value={credentials.email}
                     onChange={(event) =>
                       setCredentials((current) => ({ ...current, email: event.target.value }))
@@ -324,7 +330,16 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
                   </p>
                 ) : null}
               </div>
-            </form>
+              </form>
+              <button
+                type="button"
+                className="classflow-login__create-account"
+                onClick={() => setIsRegistering(true)}
+              >
+                Create an account
+              </button>
+              </>
+            )}
           </section>
         </main>
 
