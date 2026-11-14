@@ -1,6 +1,17 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
-import { ArrowRight, Eye, EyeOff, ExternalLink, LockKeyhole, Mail } from 'lucide-react'
+import {
+  AlertCircle,
+  ArrowRight,
+  BriefcaseBusiness,
+  Check,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  LockKeyhole,
+  Mail,
+} from 'lucide-react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { RegistrationForm } from '@/components/auth/RegistrationForm'
@@ -36,12 +47,34 @@ function getReturnTo(state: unknown, role: ClassFlowRole) {
   return `${from.pathname}${search}${hash}`
 }
 
-const roles: { role: ClassFlowRole; label: string }[] = [
-  { role: 'student', label: 'Student' },
-  { role: 'professor', label: 'Professor' },
+const roles: {
+  role: ClassFlowRole
+  label: string
+  icon: typeof GraduationCap
+  note: string
+}[] = [
+  {
+    role: 'student',
+    label: 'Student',
+    icon: GraduationCap,
+    note: 'Use your institutional email. Class schedules, attendance records, and announcements stay in sync with your enrolled sections.',
+  },
+  {
+    role: 'professor',
+    label: 'Professor',
+    icon: BriefcaseBusiness,
+    note: 'Faculty accounts require administrator approval before sign-in. Registration corrections can be resubmitted from the account form.',
+  },
+]
+
+const highlights = [
+  'Section rosters and class schedules',
+  'Session attendance and QR check-in',
+  'Class announcements and activities',
 ]
 
 const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || '/admin'
+const campusPhoto = `${import.meta.env.BASE_URL}images/ccs-campus.png`
 
 export function RoleLoginPage({ role }: RoleLoginPageProps) {
   const { status, user, login } = useAuth()
@@ -56,10 +89,10 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isRegistering, setIsRegistering] = useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
-  const [indicatorStyle, setIndicatorStyle] = useState({ top: 0, height: 0 })
   const focusTabAfterNavigation = useRef(false)
-  const roleTabsRef = useRef<HTMLDivElement>(null)
   const roleTabRefs = useRef<Partial<Record<ClassFlowRole, HTMLButtonElement>>>({})
+
+  const activeRole = roles.find((option) => option.role === role) ?? roles[0]
 
   useEffect(() => {
     if (!focusTabAfterNavigation.current) {
@@ -68,42 +101,6 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
 
     focusTabAfterNavigation.current = false
     roleTabRefs.current[role]?.focus()
-  }, [role])
-
-  useLayoutEffect(() => {
-    const roleTabs = roleTabsRef.current
-    const selectedTab = roleTabRefs.current[role]
-
-    if (!roleTabs || !selectedTab) {
-      return
-    }
-
-    const updateIndicator = () => {
-      const tabsBounds = roleTabs.getBoundingClientRect()
-      const selectedBounds = selectedTab.getBoundingClientRect()
-
-      setIndicatorStyle({
-        top: selectedBounds.top - tabsBounds.top,
-        height: selectedBounds.height,
-      })
-    }
-
-    updateIndicator()
-
-    const resizeObserver = new ResizeObserver(updateIndicator)
-    resizeObserver.observe(roleTabs)
-    roles.forEach(({ role: tabRole }) => {
-      const tab = roleTabRefs.current[tabRole]
-      if (tab) {
-        resizeObserver.observe(tab)
-      }
-    })
-    window.addEventListener('resize', updateIndicator)
-
-    return () => {
-      resizeObserver.disconnect()
-      window.removeEventListener('resize', updateIndicator)
-    }
   }, [role])
 
   if (status === 'authenticated' && user) {
@@ -147,6 +144,16 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
     selectRole(roles[nextIndex].role, true)
   }
 
+  function openRegistration() {
+    setIsRegistering(true)
+    setError(null)
+  }
+
+  function closeRegistration() {
+    setIsRegistering(false)
+    setError(null)
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
@@ -173,183 +180,288 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
   }
 
   return (
-    <div className={`classflow-login classflow-login--${role}${isRegistering ? ' classflow-login--register' : ''}`}>
-      <div className="classflow-login__shell">
-        <header className="classflow-login__header">
-          <Link to="/" className="classflow-login__brand" aria-label="ClassFlow home">
-            ClassFlow
-          </Link>
-          <span className="classflow-login__college">
-            College of Computer Studies
-          </span>
-        </header>
+    <div className="cf-auth">
+      <div className="cf-auth__shell">
+        <aside className="cf-auth__showcase" aria-label="About ClassFlow">
+          <img
+            className="cf-auth__showcase-photo"
+            src={campusPhoto}
+            alt="College of Computer Studies campus building"
+            onError={(event) => {
+              event.currentTarget.style.display = 'none'
+            }}
+          />
+          <div className="cf-auth__showcase-wash" aria-hidden="true" />
 
-        <main className="classflow-login__main">
-          <section className="classflow-login__introduction" aria-label="Choose an account type">
-            <p className="classflow-login__welcome">Welcome back</p>
+          <div className="cf-auth__showcase-inner">
+            <Link to="/" className="cf-auth__brand" aria-label="ClassFlow home">
+              <span className="cf-auth__brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 32 32" fill="none">
+                  <path
+                    d="M5 20c3.5-7 7-7 10.5 0s7 7 10.5 0"
+                    stroke="currentColor"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="24" cy="12.5" r="2" fill="currentColor" />
+                </svg>
+              </span>
+              <span className="cf-auth__brand-text">
+                <span className="cf-auth__brand-name">ClassFlow</span>
+                <span className="cf-auth__brand-sub">College of Computer Studies</span>
+              </span>
+            </Link>
 
-            <div
-              ref={roleTabsRef}
-              className="classflow-login__role-tabs"
-              role="tablist"
-              aria-label="Sign-in role"
-            >
-              {roles.map((option) => {
-                const isSelected = option.role === role
+            <div className="cf-auth__showcase-body">
+              <p className="cf-auth__eyebrow">CCSync Academic Platform</p>
+              <h1 className="cf-auth__headline">
+                The academic day for Computer Studies, kept in one calm place.
+              </h1>
+              <p className="cf-auth__description">
+                ClassFlow brings class schedules, attendance, and coursework
+                communication together for CCS faculty and students, aligned to the
+                sections and terms the college already runs.
+              </p>
 
-                return (
-                  <button
-                    key={option.role}
-                    ref={(element) => {
-                      if (element) {
-                        roleTabRefs.current[option.role] = element
-                      }
-                    }}
-                    id={`classflow-role-tab-${option.role}`}
-                    type="button"
-                    role="tab"
-                    aria-selected={isSelected}
-                    aria-controls="classflow-login-panel"
-                    tabIndex={isSelected ? 0 : -1}
-                    className="classflow-login__role-tab"
-                    onClick={() => selectRole(option.role)}
-                    onKeyDown={handleRoleKeyDown}
-                  >
-                    {option.label}
-                  </button>
-                )
-              })}
-              <span
-                className="classflow-login__indicator"
-                style={{
-                  height: `${indicatorStyle.height}px`,
-                  transform: `translateY(${indicatorStyle.top}px)`,
-                }}
-                aria-hidden="true"
-              />
+              <ul className="cf-auth__points">
+                {highlights.map((item) => (
+                  <li key={item}>
+                    <Check aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </section>
 
-          <section
-            id="classflow-login-panel"
-            className="classflow-login__form-section"
-            role="tabpanel"
-            tabIndex={-1}
-            aria-labelledby={`classflow-role-tab-${role}`}
-          >
-            {isRegistering ? (
-              <RegistrationForm onBack={() => setIsRegistering(false)} />
-            ) : (
-              <>
-              <form
-                className="classflow-login__form"
-                onSubmit={handleSubmit}
-                aria-busy={isSubmitting}
-              >
-              <div className="classflow-login__field">
-                <label htmlFor="classflow-email">School email</label>
-                <div className="classflow-login__text-input">
-                  <Mail aria-hidden="true" />
-                  <input
-                    id="classflow-email"
-                    name="email"
-                    type="email"
-                    autoComplete="username"
-                    placeholder="you@lspu.edu.ph"
-                    value={credentials.email}
-                    onChange={(event) =>
-                      setCredentials((current) => ({ ...current, email: event.target.value }))
-                    }
-                    required
-                  />
-                </div>
-              </div>
+            <div className="cf-auth__showcase-foot">
+              <span>Lyceum of the Philippines University</span>
+              <span className="cf-auth__dot" aria-hidden="true" />
+              <span>San Pablo City Campus</span>
+            </div>
+          </div>
+        </aside>
 
-              <div className="classflow-login__field">
-                <label htmlFor="classflow-password">Password</label>
-                <div className="classflow-login__password-input">
-                  <LockKeyhole aria-hidden="true" />
-                  <input
-                    id="classflow-password"
-                    name="password"
-                    type={isPasswordVisible ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    placeholder="Enter your password"
-                    value={credentials.password}
-                    onChange={(event) =>
-                      setCredentials((current) => ({
-                        ...current,
-                        password: event.target.value,
-                      }))
-                    }
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="classflow-login__visibility-toggle"
-                    aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
-                    aria-pressed={isPasswordVisible}
-                    onClick={() => setIsPasswordVisible((visible) => !visible)}
-                  >
-                    {isPasswordVisible ? (
-                      <EyeOff aria-hidden="true" />
-                    ) : (
-                      <Eye aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
-              </div>
+        <div className="cf-auth__panel">
+          <div className="cf-auth__panel-inner">
+            <div className="cf-auth__compact-brand">
+              <Link to="/">ClassFlow</Link>
+              <span className="cf-auth__compact-campus">
+                CCS · LSPU San Pablo City Campus
+              </span>
+            </div>
 
-              <label className="classflow-login__remember">
-                <input
-                  type="checkbox"
-                  checked={credentials.remember ?? false}
-                  onChange={(event) =>
-                    setCredentials((current) => ({
-                      ...current,
-                      remember: event.target.checked,
-                    }))
-                  }
-                />
-                <span>Keep me signed in on this device</span>
-              </label>
-
-              <button
-                className="classflow-login__submit"
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Signing in...' : 'Sign in'}
-                <ArrowRight aria-hidden="true" />
-              </button>
-
-              <div className="classflow-login__feedback" aria-live="polite">
-                {error ? (
-                  <p className="classflow-login__error" role="alert">
-                    {error}
+            <section
+              id="classflow-login-panel"
+              className="cf-auth__card"
+              role="tabpanel"
+              tabIndex={-1}
+              aria-labelledby={`classflow-role-tab-${role}`}
+            >
+              {isRegistering ? (
+                <RegistrationForm onBack={closeRegistration} />
+              ) : (
+                <>
+                  <h1 className="cf-auth__heading">
+                    Welcome to ClassFlow
+                  </h1>
+                  <p className="cf-auth__subheading">
+                    Sign in with the email issued by the college to continue.
                   </p>
-                ) : null}
-              </div>
-              </form>
-              <button
-                type="button"
-                className="classflow-login__create-account"
-                onClick={() => setIsRegistering(true)}
-              >
-                Create an account
-              </button>
-              </>
-            )}
-          </section>
-        </main>
 
-        <footer className="classflow-login__footer">
-          <span>Administrator?</span>{' '}
-          <a href={adminAppUrl}>
-            Open CCSync Admin
-            <ExternalLink aria-hidden="true" />
-          </a>
-        </footer>
+                  <div
+                    className="cf-auth__tabs"
+                    role="tablist"
+                    aria-label="Sign-in role"
+                  >
+                    {roles.map((option) => {
+                      const Icon = option.icon
+                      const isSelected = option.role === role
+
+                      return (
+                        <button
+                          key={option.role}
+                          ref={(element) => {
+                            if (element) {
+                              roleTabRefs.current[option.role] = element
+                            }
+                          }}
+                          id={`classflow-role-tab-${option.role}`}
+                          type="button"
+                          role="tab"
+                          aria-selected={isSelected}
+                          aria-controls="classflow-login-panel"
+                          tabIndex={isSelected ? 0 : -1}
+                          className="cf-auth__tab"
+                          onClick={() => selectRole(option.role)}
+                          onKeyDown={handleRoleKeyDown}
+                        >
+                          <Icon aria-hidden="true" />
+                          {option.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <p className="cf-auth__role-note">{activeRole.note}</p>
+
+                  <form
+                    className="cf-auth__form"
+                    onSubmit={handleSubmit}
+                    aria-busy={isSubmitting}
+                  >
+                    <div className="cf-auth__field">
+                      <label className="cf-auth__label" htmlFor="classflow-email">
+                        Email address
+                      </label>
+                      <div className="cf-auth__control">
+                        <span className="cf-auth__control-icon">
+                          <Mail aria-hidden="true" />
+                        </span>
+                        <input
+                          id="classflow-email"
+                          name="email"
+                          type="email"
+                          className="cf-auth__input cf-auth__input--icon"
+                          autoComplete="username"
+                          placeholder="you@lspu.edu.ph"
+                          value={credentials.email}
+                          onChange={(event) =>
+                            setCredentials((current) => ({
+                              ...current,
+                              email: event.target.value,
+                            }))
+                          }
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="cf-auth__field">
+                      <div className="cf-auth__label-row">
+                        <label className="cf-auth__label" htmlFor="classflow-password">
+                          Password
+                        </label>
+                        <button
+                          type="button"
+                          className="cf-auth__link"
+                          onClick={() =>
+                            setError(
+                              'Password reset is not available yet. Ask the CCS administrator to reset your ClassFlow password.',
+                            )
+                          }
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                      <div className="cf-auth__control">
+                        <span className="cf-auth__control-icon">
+                          <LockKeyhole aria-hidden="true" />
+                        </span>
+                        <input
+                          id="classflow-password"
+                          name="password"
+                          type={isPasswordVisible ? 'text' : 'password'}
+                          className="cf-auth__input cf-auth__input--icon cf-auth__input--reveal"
+                          autoComplete="current-password"
+                          placeholder="Enter your password"
+                          value={credentials.password}
+                          onChange={(event) =>
+                            setCredentials((current) => ({
+                              ...current,
+                              password: event.target.value,
+                            }))
+                          }
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="cf-auth__reveal"
+                          aria-label={
+                            isPasswordVisible ? 'Hide password' : 'Show password'
+                          }
+                          aria-pressed={isPasswordVisible}
+                          onClick={() => setIsPasswordVisible((visible) => !visible)}
+                        >
+                          {isPasswordVisible ? (
+                            <EyeOff aria-hidden="true" />
+                          ) : (
+                            <Eye aria-hidden="true" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    <label className="cf-auth__check" htmlFor="classflow-remember">
+                      <input
+                        id="classflow-remember"
+                        type="checkbox"
+                        checked={credentials.remember ?? false}
+                        onChange={(event) =>
+                          setCredentials((current) => ({
+                            ...current,
+                            remember: event.target.checked,
+                          }))
+                        }
+                      />
+                      <span>Keep me signed in on this device</span>
+                    </label>
+
+                    <div aria-live="polite">
+                      {error ? (
+                        <div className="cf-auth__alert" role="alert">
+                          <AlertCircle aria-hidden="true" />
+                          <p>{error}</p>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <button
+                      className="cf-auth__submit"
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <span className="cf-auth__spinner" aria-hidden="true" />
+                          Signing in…
+                        </>
+                      ) : (
+                        <>
+                          Sign in
+                          <ArrowRight aria-hidden="true" />
+                        </>
+                      )}
+                    </button>
+
+                    <div className="cf-auth__row">
+                      <span className="cf-auth__hint">New to ClassFlow?</span>
+                      <button
+                        type="button"
+                        className="cf-auth__link"
+                        onClick={openRegistration}
+                      >
+                        Create an account
+                      </button>
+                    </div>
+
+                    <p className="cf-auth__hint">
+                      Student accounts activate immediately. Professor accounts are
+                      reviewed by an administrator before first sign-in.
+                    </p>
+                  </form>
+                </>
+              )}
+            </section>
+
+            <footer className="cf-auth__panel-foot">
+              <span>© {new Date().getFullYear()} CCSync · College of Computer Studies</span>
+              <a href={adminAppUrl}>
+                Administrator sign-in
+                <ExternalLink aria-hidden="true" />
+              </a>
+            </footer>
+          </div>
+        </div>
       </div>
     </div>
   )

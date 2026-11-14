@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { AlertCircle, ArrowLeft, CheckCircle2, Info } from 'lucide-react'
 import {
   fetchProfessorCorrection,
   fetchRegistrationOptions,
@@ -212,98 +212,155 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
 
   if (success) {
     return (
-      <div className="classflow-register">
-        <h1 className="classflow-register__title">Registration complete</h1>
-        <p className="classflow-register__success" role="status">{success}</p>
-        <button type="button" className="classflow-login__submit" onClick={onBack}>
-          Back to sign in <ArrowLeft aria-hidden="true" />
+      <div className="cf-auth__form">
+        <div className="cf-auth__success">
+          <CheckCircle2 aria-hidden="true" />
+          <p role="status">{success}</p>
+        </div>
+
+        <h1 className="cf-auth__heading">Registration submitted</h1>
+        <p className="cf-auth__subheading">
+          Your details are with the college. Student accounts can sign in right
+          away; professor accounts wait for administrator approval.
+        </p>
+
+        <button type="button" className="cf-auth__submit" onClick={onBack}>
+          Back to sign in
         </button>
       </div>
     )
   }
 
   return (
-    <div className="classflow-register">
-      <button type="button" className="classflow-register__back" onClick={onBack}>
-        <ArrowLeft aria-hidden="true" /> Back to sign in
-      </button>
-      <h1 className="classflow-register__title">Create an account</h1>
-
-      <div className="classflow-register__types" role="group" aria-label="Account type">
-        {(['student', 'professor'] as const).map((type) => (
-          <button
-            key={type}
-            type="button"
-            className={accountType === type ? 'is-selected' : ''}
-            aria-pressed={accountType === type}
-            onClick={() => {
-              setAccountType(type)
-              setIsCorrectionMode(false)
-              setIsCorrectionVerified(false)
-              setValues(initialValues)
-              setError(null)
-              setFieldErrors({})
-            }}
-          >
-            {type === 'student' ? 'Student' : 'Professor'}
-          </button>
-        ))}
-      </div>
-
-      {isLoadingOptions ? (
-        <p className="classflow-register__message" role="status">Loading registration options…</p>
-      ) : null}
-      {error ? <p className="classflow-login__error" role="alert">{error}</p> : null}
-
-      {accountType === 'professor' && !isCorrectionMode ? (
-        <button type="button" className="classflow-register__text-button" onClick={startCorrectionMode}>
-          Resubmit a returned professor registration
+    <div>
+      <div className="cf-auth__form">
+        <button type="button" className="cf-auth__back" onClick={onBack}>
+          <ArrowLeft aria-hidden="true" /> Back to sign in
         </button>
-      ) : null}
+        <h1 className="cf-auth__heading">Create an account</h1>
+        <p className="cf-auth__subheading">
+          Registration uses your institutional email. Administrator and Department
+          Personnel accounts are provisioned by the college, not here.
+        </p>
 
-      {isCorrectionMode && !isCorrectionVerified ? (
-        <form className="classflow-login__form" onSubmit={(event) => void loadCorrection(event)}>
-          <p className="classflow-register__message">
-            Verify the institutional email and current password used for the returned registration.
-          </p>
-          <Field label="Institutional email" name="correction-email" error={firstError(fieldErrors, 'email')}>
-            <input
-              id="correction-email"
-              type="email"
-              autoComplete="email"
-              required
-              value={values.email}
-              onChange={(event) => update('email', event.target.value)}
-            />
-          </Field>
-          <Field label="Current password" name="correction-password">
-            <input
-              id="correction-password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={correctionPassword}
-              onChange={(event) => setCorrectionPassword(event.target.value)}
-            />
-          </Field>
-          <button type="submit" className="classflow-login__submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Checking…' : 'Load returned registration'}
-          </button>
-        </form>
-      ) : null}
+        <fieldset className="cf-auth__fieldset">
+          <legend className="cf-auth__legend">Account type</legend>
 
-      {(!isCorrectionMode || isCorrectionVerified) ? (
-        <form className="classflow-login__form" onSubmit={(event) => void submitRegistration(event)}>
-          {correctionReason ? (
-            <div className="classflow-register__correction" role="status">
-              <strong>Requested correction</strong>
-              <p>{correctionReason}</p>
-            </div>
+          <div className="cf-auth__tabs" role="group" aria-label="Account type">
+            {(['student', 'professor'] as const).map((type) => {
+              const isSelected = accountType === type
+
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  className="cf-auth__tab"
+                  aria-pressed={isSelected}
+                  onClick={() => {
+                    setAccountType(type)
+                    setIsCorrectionMode(false)
+                    setIsCorrectionVerified(false)
+                    setValues(initialValues)
+                    setError(null)
+                    setFieldErrors({})
+                  }}
+                >
+                  {type === 'student' ? 'Student' : 'Professor'}
+                </button>
+              )
+            })}
+          </div>
+
+          {isLoadingOptions ? (
+            <p className="cf-auth__hint" role="status">
+              Loading registration options…
+            </p>
           ) : null}
 
-          <Field label="Full name" name="registration-name" error={firstError(fieldErrors, 'name')}>
+          {accountType === 'professor' && !isCorrectionMode ? (
+            <button
+              type="button"
+              className="cf-auth__text-button"
+              onClick={startCorrectionMode}
+            >
+              Resubmit a returned professor registration
+            </button>
+          ) : null}
+        </fieldset>
+
+        {error ? (
+          <div className="cf-auth__alert" role="alert">
+            <AlertCircle aria-hidden="true" />
+            <p>{error}</p>
+          </div>
+        ) : null}
+
+        {isCorrectionMode && !isCorrectionVerified ? (
+          <form
+            className="cf-auth__form"
+            onSubmit={(event) => void loadCorrection(event)}
+          >
+            <p className="cf-auth__hint">
+              Verify the institutional email and the current password used for the
+              returned registration.
+            </p>
+            <Field
+              label="Institutional email"
+              name="correction-email"
+              error={firstError(fieldErrors, 'email')}
+            >
+              <input
+                id="correction-email"
+                className="cf-auth__input"
+                type="email"
+                autoComplete="email"
+                required
+                value={values.email}
+                onChange={(event) => update('email', event.target.value)}
+              />
+            </Field>
+            <Field label="Current password" name="correction-password">
+              <input
+                id="correction-password"
+                className="cf-auth__input"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={correctionPassword}
+                onChange={(event) => setCorrectionPassword(event.target.value)}
+              />
+            </Field>
+            <button type="submit" className="cf-auth__submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Checking…' : 'Load returned registration'}
+            </button>
+          </form>
+        ) : null}
+
+        {!isCorrectionMode || isCorrectionVerified ? (
+          <form
+            className="cf-auth__form"
+            onSubmit={(event) => void submitRegistration(event)}
+          >
+            {correctionReason ? (
+              <div className="cf-auth__notice">
+                <Info aria-hidden="true" />
+                <div>
+                  <p>
+                    <strong>Requested correction</strong>
+                  </p>
+                  <p>{correctionReason}</p>
+                </div>
+              </div>
+            ) : null}
+
+          <Field
+            label="Full name"
+            name="registration-name"
+            error={firstError(fieldErrors, 'name')}
+          >
             <input
               id="registration-name"
+              className="cf-auth__input"
               type="text"
               autoComplete="name"
               required
@@ -313,9 +370,14 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
           </Field>
 
           {accountType === 'student' ? (
-            <Field label="Student number" name="registration-student-number" error={firstError(fieldErrors, 'student_number')}>
+            <Field
+              label="Student number"
+              name="registration-student-number"
+              error={firstError(fieldErrors, 'student_number')}
+            >
               <input
                 id="registration-student-number"
+                className="cf-auth__input"
                 type="text"
                 autoComplete="off"
                 maxLength={32}
@@ -326,9 +388,15 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
             </Field>
           ) : null}
 
-          <Field label="Institutional email" name="registration-email" error={firstError(fieldErrors, 'email')}>
+          <Field
+            label="Institutional email"
+            name="registration-email"
+            error={firstError(fieldErrors, 'email')}
+            hint="Use the email address issued by the college."
+          >
             <input
               id="registration-email"
+              className="cf-auth__input"
               type="email"
               autoComplete="email"
               required
@@ -338,10 +406,17 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
           </Field>
 
           {!isCorrectionVerified ? (
-            <>
-              <Field label="Password" name="registration-password" error={firstError(fieldErrors, 'password')}>
+            <div className="cf-auth__grid">
+              <Field
+                label="Password"
+                name="registration-password"
+                error={firstError(fieldErrors, 'password')}
+                hint="At least 12 characters."
+                wide
+              >
                 <input
                   id="registration-password"
+                  className="cf-auth__input"
                   type="password"
                   autoComplete="new-password"
                   minLength={12}
@@ -350,28 +425,35 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                   onChange={(event) => update('password', event.target.value)}
                 />
               </Field>
-              <Field label="Confirm password" name="registration-confirm-password">
+              <Field
+                label="Confirm password"
+                name="registration-confirm-password"
+                error={firstError(fieldErrors, 'password_confirmation')}
+                wide
+              >
                 <input
                   id="registration-confirm-password"
+                  className="cf-auth__input"
                   type="password"
                   autoComplete="new-password"
                   minLength={12}
                   required
                   value={values.password_confirmation}
-                  aria-invalid={Boolean(firstError(fieldErrors, 'password_confirmation'))}
-                  onChange={(event) => update('password_confirmation', event.target.value)}
+                  aria-invalid={Boolean(
+                    firstError(fieldErrors, 'password_confirmation'),
+                  )}
+                  onChange={(event) =>
+                    update('password_confirmation', event.target.value)
+                  }
                 />
-                {firstError(fieldErrors, 'password_confirmation') ? (
-                  <p className="classflow-register__field-error">
-                    {firstError(fieldErrors, 'password_confirmation')}
-                  </p>
-                ) : null}
               </Field>
-            </>
+            </div>
           ) : null}
 
           {accountType === 'student' ? (
-            <>
+            <fieldset className="cf-auth__fieldset">
+              <legend className="cf-auth__legend">Class placement</legend>
+
               <SelectField
                 label="Program"
                 name="registration-program"
@@ -386,7 +468,9 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
               >
                 <option value="">Select a program</option>
                 {options?.programs.map((program) => (
-                  <option key={program.id} value={program.id}>{program.code} · {program.name}</option>
+                  <option key={program.id} value={program.id}>
+                    {program.code} · {program.name}
+                  </option>
                 ))}
               </SelectField>
               <SelectField
@@ -402,7 +486,9 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
               >
                 <option value="">Select a year level</option>
                 {availableYearLevels.map((yearLevel) => (
-                  <option key={yearLevel.id} value={yearLevel.id}>{yearLevel.name}</option>
+                  <option key={yearLevel.id} value={yearLevel.id}>
+                    {yearLevel.name}
+                  </option>
                 ))}
               </SelectField>
               <SelectField
@@ -416,78 +502,105 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                 <option value="">Select a section</option>
                 {availableSections.map((section) => (
                   <option key={section.id} value={section.id}>
-                    {section.code}{section.name ? ` · ${section.name}` : ''}
+                    {section.code}
+                    {section.name ? ` · ${section.name}` : ''}
                   </option>
                 ))}
               </SelectField>
-            </>
+            </fieldset>
           ) : (
-            <>
-              <SelectField
-                label="Employment type"
-                name="registration-employment-type"
-                value={values.employment_type}
-                onChange={(value) => update('employment_type', value as Values['employment_type'])}
-              >
-                <option value="full_time">Full-time Professor</option>
-                <option value="part_time">Part-time Professor</option>
-              </SelectField>
-              <SelectField
-                label="Department affiliation"
-                name="registration-affiliation"
-                value={values.department_affiliation}
-                error={firstError(fieldErrors, 'department_affiliation')}
-                onChange={(value) => {
-                  const affiliation = value as Values['department_affiliation']
-                  const ccsDepartment = options?.departments.find(
-                    (department) => department.code === 'CCS',
-                  )
-                  update('department_affiliation', affiliation)
-                  update(
-                    'department_id',
-                    affiliation === 'ccs' && ccsDepartment ? String(ccsDepartment.id) : '',
-                  )
-                }}
-              >
-                <option value="">Select affiliation</option>
-                <option value="ccs">College of Computer Studies (CCS)</option>
-                <option value="other">Other Department</option>
-              </SelectField>
-              {values.department_affiliation === 'other' ? (
+            <fieldset className="cf-auth__fieldset">
+              <legend className="cf-auth__legend">Faculty appointment</legend>
+
+              <div className="cf-auth__grid">
                 <SelectField
-                  label="Other department"
-                  name="registration-department"
-                  value={values.department_id}
-                  error={firstError(fieldErrors, 'department_id')}
-                  disabled={!availableDepartments.length}
-                  onChange={(value) => update('department_id', value)}
+                  label="Employment type"
+                  name="registration-employment-type"
+                  value={values.employment_type}
+                  onChange={(value) =>
+                    update('employment_type', value as Values['employment_type'])
+                  }
                 >
-                  <option value="">
-                    {availableDepartments.length ? 'Select a department' : 'No configured departments available'}
-                  </option>
-                  {availableDepartments.map((department) => (
-                    <option key={department.id} value={department.id}>{department.name}</option>
-                  ))}
+                  <option value="full_time">Full-time Professor</option>
+                  <option value="part_time">Part-time Professor</option>
                 </SelectField>
-              ) : null}
-            </>
+                <SelectField
+                  label="Department affiliation"
+                  name="registration-affiliation"
+                  value={values.department_affiliation}
+                  error={firstError(fieldErrors, 'department_affiliation')}
+                  onChange={(value) => {
+                    const affiliation = value as Values['department_affiliation']
+                    const ccsDepartment = options?.departments.find(
+                      (department) => department.code === 'CCS',
+                    )
+                    update('department_affiliation', affiliation)
+                    update(
+                      'department_id',
+                      affiliation === 'ccs' && ccsDepartment
+                        ? String(ccsDepartment.id)
+                        : '',
+                    )
+                  }}
+                >
+                  <option value="">Select affiliation</option>
+                  <option value="ccs">College of Computer Studies (CCS)</option>
+                  <option value="other">Other Department</option>
+                </SelectField>
+                {values.department_affiliation === 'other' ? (
+                  <SelectField
+                    label="Other department"
+                    name="registration-department"
+                    value={values.department_id}
+                    error={firstError(fieldErrors, 'department_id')}
+                    disabled={!availableDepartments.length}
+                    onChange={(value) => update('department_id', value)}
+                    wide
+                  >
+                    <option value="">
+                      {availableDepartments.length
+                        ? 'Select a department'
+                        : 'No other departments are configured yet'}
+                    </option>
+                    {availableDepartments.map((department) => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                    ))}
+                  </SelectField>
+                ) : null}
+              </div>
+
+              <p className="cf-auth__hint">
+                Professor accounts stay pending until an administrator approves
+                them with an employee number.
+              </p>
+            </fieldset>
           )}
 
           <button
-            className="classflow-login__submit"
+            className="cf-auth__submit"
             type="submit"
             disabled={
               isSubmitting ||
               isLoadingOptions ||
               (accountType === 'professor' &&
-                (!options?.departments.some((department) => department.code === 'CCS') ||
-                  (values.department_affiliation === 'other' && !availableDepartments.length)))
+                (!options?.departments.some(
+                  (department) => department.code === 'CCS',
+                ) ||
+                  (values.department_affiliation === 'other' &&
+                    !availableDepartments.length)))
             }
           >
-            {isSubmitting ? 'Submitting…' : isCorrectionMode ? 'Resubmit registration' : 'Create account'}
+            {isSubmitting
+              ? 'Submitting…'
+              : isCorrectionMode
+                ? 'Resubmit registration'
+                : 'Create account'}
           </button>
-        </form>
-      ) : null}
+          </form>
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -496,15 +609,23 @@ interface FieldProps {
   label: string
   name: string
   error?: string
+  hint?: string
+  wide?: boolean
   children: ReactNode
 }
 
-function Field({ label, name, error, children }: FieldProps) {
+function Field({ label, name, error, hint, wide = false, children }: FieldProps) {
   return (
-    <div className="classflow-login__field">
-      <label htmlFor={name}>{label}</label>
+    <div className={wide ? 'cf-auth__field cf-auth__field--wide' : 'cf-auth__field'}>
+      <label className="cf-auth__label" htmlFor={name}>
+        {label}
+      </label>
       {children}
-      {error ? <p className="classflow-register__field-error">{error}</p> : null}
+      {error ? (
+        <p className="cf-auth__field-error">{error}</p>
+      ) : hint ? (
+        <p className="cf-auth__hint">{hint}</p>
+      ) : null}
     </div>
   )
 }
@@ -515,6 +636,7 @@ interface SelectFieldProps {
   value: string
   error?: string
   disabled?: boolean
+  wide?: boolean
   onChange: (value: string) => void
   children: ReactNode
 }
@@ -525,22 +647,40 @@ function SelectField({
   value,
   error,
   disabled = false,
+  wide = false,
   onChange,
   children,
 }: SelectFieldProps) {
   return (
-    <div className="classflow-login__field">
-      <label htmlFor={name}>{label}</label>
-      <select
-        id={name}
-        required
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {children}
-      </select>
-      {error ? <p className="classflow-register__field-error">{error}</p> : null}
+    <div className={wide ? 'cf-auth__field cf-auth__field--wide' : 'cf-auth__field'}>
+      <label className="cf-auth__label" htmlFor={name}>
+        {label}
+      </label>
+      <div className="cf-auth__control">
+        <select
+          id={name}
+          className="cf-auth__input"
+          required
+          value={value}
+          disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          onChange={(event) => onChange(event.target.value)}
+        >
+          {children}
+        </select>
+        <span className="cf-auth__select-chevron" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path
+              d="M6 8.5 10 12.5 14 8.5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </div>
+      {error ? <p className="cf-auth__field-error">{error}</p> : null}
     </div>
   )
 }
