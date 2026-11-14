@@ -1,6 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
-import { AlertCircle, ArrowLeft, CheckCircle2, Info } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { FormEvent, KeyboardEvent, ReactNode } from 'react'
+import {
+  AlertCircle,
+  ArrowLeft,
+  BriefcaseBusiness,
+  CheckCircle2,
+  GraduationCap,
+  Info,
+} from 'lucide-react'
 import {
   fetchProfessorCorrection,
   fetchRegistrationOptions,
@@ -15,6 +22,15 @@ import type {
 import { getApiErrorMessage, getApiFieldErrors } from '@/utils/apiError'
 
 type AccountType = 'student' | 'professor'
+
+const accountTypes: {
+  type: AccountType
+  label: string
+  icon: typeof GraduationCap
+}[] = [
+  { type: 'student', label: 'Student', icon: GraduationCap },
+  { type: 'professor', label: 'Professor', icon: BriefcaseBusiness },
+]
 
 interface RegistrationFormProps {
   onBack: () => void
@@ -66,6 +82,7 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
   const [correctionReason, setCorrectionReason] = useState<string | null>(null)
   const [correctionPassword, setCorrectionPassword] = useState('')
   const [correctionOriginalEmail, setCorrectionOriginalEmail] = useState('')
+  const accountTypeRefs = useRef<Partial<Record<AccountType, HTMLButtonElement | null>>>({})
 
   useEffect(() => {
     let active = true
@@ -149,6 +166,52 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  function selectAccountType(type: AccountType) {
+    setAccountType(type)
+    setIsCorrectionMode(false)
+    setIsCorrectionVerified(false)
+    setValues(initialValues)
+    setError(null)
+    setFieldErrors({})
+  }
+
+  function handleAccountTypeKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const navigationKeys = [
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowUp',
+      'ArrowDown',
+      'Home',
+      'End',
+    ]
+    if (!navigationKeys.includes(event.key)) {
+      return
+    }
+
+    event.preventDefault()
+
+    const currentIndex = accountTypes.findIndex((option) => option.type === accountType)
+    let nextIndex = currentIndex
+
+    if (event.key === 'Home') {
+      nextIndex = 0
+    } else if (event.key === 'End') {
+      nextIndex = accountTypes.length - 1
+    } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % accountTypes.length
+    } else {
+      nextIndex = (currentIndex - 1 + accountTypes.length) % accountTypes.length
+    }
+
+    const nextType = accountTypes[nextIndex]
+    if (!nextType) {
+      return
+    }
+
+    selectAccountType(nextType.type)
+    accountTypeRefs.current[nextType.type]?.focus()
   }
 
   async function submitRegistration(event: FormEvent<HTMLFormElement>) {
@@ -246,26 +309,38 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
         <fieldset className="cf-auth__fieldset">
           <legend className="cf-auth__legend">Account type</legend>
 
-          <div className="cf-auth__tabs" role="group" aria-label="Account type">
-            {(['student', 'professor'] as const).map((type) => {
-              const isSelected = accountType === type
+          <div
+            className="cf-auth__account-types"
+            role="radiogroup"
+            aria-label="Account type"
+            onKeyDown={handleAccountTypeKeyDown}
+          >
+            {accountTypes.map((option) => {
+              const Icon = option.icon
+              const isSelected = accountType === option.type
 
               return (
                 <button
-                  key={type}
+                  key={option.type}
+                  ref={(element) => {
+                    accountTypeRefs.current[option.type] = element
+                  }}
                   type="button"
-                  className="cf-auth__tab"
-                  aria-pressed={isSelected}
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={isSelected ? 0 : -1}
+                  className="cf-auth__account-type"
                   onClick={() => {
-                    setAccountType(type)
-                    setIsCorrectionMode(false)
-                    setIsCorrectionVerified(false)
-                    setValues(initialValues)
-                    setError(null)
-                    setFieldErrors({})
+                    selectAccountType(option.type)
                   }}
                 >
-                  {type === 'student' ? 'Student' : 'Professor'}
+                  <span className="cf-auth__account-type-icon">
+                    <Icon aria-hidden="true" />
+                  </span>
+                  <span className="cf-auth__account-type-label">{option.label}</span>
+                  <span className="cf-auth__account-type-check" aria-hidden="true">
+                    <CheckCircle2 />
+                  </span>
                 </button>
               )
             })}
