@@ -15,7 +15,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { RegistrationForm } from '@/components/auth/RegistrationForm'
 import type { ClassFlowRole, LoginCredentials } from '@/types/auth'
-import { getApiErrorMessage } from '@/utils/apiError'
+import { getApiErrorMessage, getApiErrorStatus } from '@/utils/apiError'
 import './RoleLoginPage.css'
 
 interface RoleLoginPageProps {
@@ -78,6 +78,7 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isRegistering, setIsRegistering] = useState(false)
+  const [correctionEmail, setCorrectionEmail] = useState<string | null>(null)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const focusTabAfterNavigation = useRef(false)
   const roleTabRefs = useRef<Partial<Record<ClassFlowRole, HTMLButtonElement>>>({})
@@ -139,12 +140,14 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
 
   function closeRegistration() {
     setIsRegistering(false)
+    setCorrectionEmail(null)
     setError(null)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
+    setCorrectionEmail(null)
     setIsSubmitting(true)
 
     try {
@@ -156,6 +159,16 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
         role,
       )
     } catch (submissionError) {
+      const message = getApiErrorMessage(submissionError, '')
+
+      if (
+        role === 'professor' &&
+        getApiErrorStatus(submissionError) === 403 &&
+        /returned for correction/i.test(message)
+      ) {
+        setCorrectionEmail(credentials.email.trim())
+      }
+
       setError(
         getApiErrorMessage(
           submissionError,
@@ -226,7 +239,11 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
               aria-labelledby={`classflow-role-tab-${role}`}
             >
               {isRegistering ? (
-                <RegistrationForm onBack={closeRegistration} />
+                <RegistrationForm
+                  onBack={closeRegistration}
+                  startInCorrectionMode={correctionEmail !== null}
+                  correctionEmail={correctionEmail ?? ''}
+                />
               ) : (
                 <>
                   <h1 className="cf-auth__heading">Welcome to ClassFlow</h1>
@@ -371,7 +388,18 @@ export function RoleLoginPage({ role }: RoleLoginPageProps) {
                       {error ? (
                         <div className="cf-auth__alert" role="alert">
                           <AlertCircle aria-hidden="true" />
-                          <p>{error}</p>
+                          <div className="cf-auth__alert-body">
+                            <p>{error}</p>
+                            {correctionEmail ? (
+                              <button
+                                type="button"
+                                className="cf-auth__alert-action"
+                                onClick={openRegistration}
+                              >
+                                Resubmit registration
+                              </button>
+                            ) : null}
+                          </div>
                         </div>
                       ) : null}
                     </div>

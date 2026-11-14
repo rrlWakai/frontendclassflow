@@ -503,17 +503,169 @@ select.cf-auth__input {
   cursor: pointer;
 }
 
-.cf-auth__select-chevron {
-  position: absolute;
-  right: 12px;
-  display: inline-flex;
+/* ------------------------------------------------------- custom dropdown --- */
+
+.cf-auth__select-control {
+  position: relative;
+}
+
+.cf-auth__select-trigger {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--cf-line-strong);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: var(--cf-cream);
+  color: var(--cf-ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.cf-auth__select-trigger:hover:not(:disabled) {
+  border-color: #bfb0a5;
+}
+
+.cf-auth__select-trigger:focus-visible {
+  border-color: var(--cf-wine-600);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(116 31 49 / 14%);
+}
+
+.cf-auth__select-trigger[aria-invalid='true'] {
+  border-color: var(--cf-danger);
+}
+
+.cf-auth__select-trigger:disabled {
+  cursor: not-allowed;
+  background: #f4efe8;
   color: var(--cf-ink-muted);
-  pointer-events: none;
+}
+
+.cf-auth__select-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-auth__select-value--placeholder {
+  color: #a2979a;
+}
+
+.cf-auth__select-chevron {
+  display: inline-flex;
+  flex: none;
+  color: var(--cf-ink-muted);
+  transition: transform 180ms ease, color 160ms ease;
 }
 
 .cf-auth__select-chevron svg {
   width: 15px;
   height: 15px;
+}
+
+.cf-auth__select-trigger[aria-expanded='true'] .cf-auth__select-chevron {
+  color: var(--cf-wine-700);
+  transform: rotate(180deg);
+}
+
+.cf-auth__select-trigger[aria-expanded='true'] {
+  border-color: var(--cf-wine-600);
+}
+
+.cf-auth__select-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 30;
+  max-height: 232px;
+  overflow-y: auto;
+  margin: 0;
+  border: 1px solid var(--cf-line);
+  border-radius: 10px;
+  padding: 6px;
+  background: #fffefc;
+  box-shadow: 0 2px 4px rgb(46 12 21 / 6%), 0 18px 38px -22px rgb(46 12 21 / 38%);
+  list-style: none;
+  animation: cf-auth-drop-in 140ms ease-out;
+}
+
+.cf-auth__select-panel:focus {
+  outline: none;
+}
+
+.cf-auth__select-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 7px;
+  padding: 9px 10px;
+  color: var(--cf-ink-soft);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.35;
+  transition: background-color 130ms ease, color 130ms ease;
+}
+
+.cf-auth__select-option-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-auth__select-check {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: currentcolor;
+  opacity: 0;
+}
+
+.cf-auth__select-check svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cf-auth__select-option[data-active='true'] {
+  background: var(--cf-parchment);
+  color: var(--cf-ink);
+}
+
+.cf-auth__select-option[aria-selected='true'] {
+  background: var(--cf-burgundy);
+  color: #fff;
+}
+
+.cf-auth__select-option[aria-selected='true'][data-active='true'] {
+  background: var(--cf-wine-800);
+}
+
+.cf-auth__select-option[aria-selected='true'] .cf-auth__select-check {
+  opacity: 1;
+}
+
+@keyframes cf-auth-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .cf-auth__reveal {
@@ -723,6 +875,37 @@ select.cf-auth__input {
 
 .cf-auth__alert p {
   margin: 0;
+}
+
+.cf-auth__alert-body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.cf-auth__alert-action {
+  border: 0;
+  border-radius: 4px;
+  padding: 0;
+  background: transparent;
+  color: #8c211d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cf-auth__alert-action:hover {
+  color: #6f1a17;
+}
+
+.cf-auth__alert-action:focus-visible {
+  outline: 2px solid #8c211d;
+  outline-offset: 2px;
 }
 
 .cf-auth__notice {
@@ -947,12 +1130,23 @@ select.cf-auth__input {
 }
 
 @media (min-width: 1024px) {
+  .cf-auth {
+    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+  }
+
   .cf-auth__shell {
+    min-height: 0;
+    height: 100%;
+    grid-template-rows: minmax(0, 1fr);
     grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
   }
 
   .cf-auth__showcase {
     display: flex;
+    height: 100%;
+    min-height: 0;
     padding: 44px;
   }
 
@@ -961,6 +1155,10 @@ select.cf-auth__input {
   }
 
   .cf-auth__panel {
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 44px 48px;
   }
 

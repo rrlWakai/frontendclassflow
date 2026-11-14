@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Info,
 } from 'lucide-react'
+import { CustomSelect } from '@/components/auth/CustomSelect'
 import {
   fetchProfessorCorrection,
   fetchRegistrationOptions,
@@ -34,6 +35,8 @@ const accountTypes: {
 
 interface RegistrationFormProps {
   onBack: () => void
+  startInCorrectionMode?: boolean
+  correctionEmail?: string
 }
 
 interface Values {
@@ -68,16 +71,26 @@ function firstError(errors: Record<string, string[]>, field: string) {
   return errors[field]?.[0]
 }
 
-export function RegistrationForm({ onBack }: RegistrationFormProps) {
-  const [accountType, setAccountType] = useState<AccountType>('student')
-  const [values, setValues] = useState<Values>(initialValues)
+export function RegistrationForm({
+  onBack,
+  startInCorrectionMode = false,
+  correctionEmail = '',
+}: RegistrationFormProps) {
+  const [accountType, setAccountType] = useState<AccountType>(
+    startInCorrectionMode ? 'professor' : 'student',
+  )
+  const [values, setValues] = useState<Values>(() =>
+    startInCorrectionMode && correctionEmail
+      ? { ...initialValues, email: correctionEmail }
+      : initialValues,
+  )
   const [options, setOptions] = useState<RegistrationOptions | null>(null)
   const [isLoadingOptions, setIsLoadingOptions] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
   const [success, setSuccess] = useState<string | null>(null)
-  const [isCorrectionMode, setIsCorrectionMode] = useState(false)
+  const [isCorrectionMode, setIsCorrectionMode] = useState(startInCorrectionMode)
   const [isCorrectionVerified, setIsCorrectionVerified] = useState(false)
   const [correctionReason, setCorrectionReason] = useState<string | null>(null)
   const [correctionPassword, setCorrectionPassword] = useState('')
@@ -248,6 +261,9 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
             ...submission,
             current_email: correctionOriginalEmail,
           })
+          setIsCorrectionMode(false)
+          setIsCorrectionVerified(false)
+          setCorrectionReason(null)
           setSuccess('Your updated registration was resubmitted for administrator review.')
         } else {
           await registerProfessor(submission)
@@ -260,17 +276,6 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  function startCorrectionMode() {
-    setAccountType('professor')
-    setIsCorrectionMode(true)
-    setIsCorrectionVerified(false)
-    setCorrectionReason(null)
-    setCorrectionOriginalEmail('')
-    setValues(initialValues)
-    setError(null)
-    setSuccess(null)
   }
 
   if (success) {
@@ -344,16 +349,6 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
               Loading registration options…
             </p>
           ) : null}
-
-          {accountType === 'professor' && !isCorrectionMode ? (
-            <button
-              type="button"
-              className="cf-auth__text-button"
-              onClick={startCorrectionMode}
-            >
-              Resubmit a returned registration
-            </button>
-          ) : null}
         </fieldset>
 
         {error ? (
@@ -382,6 +377,7 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                 className="cf-auth__input"
                 type="email"
                 autoComplete="email"
+                placeholder="Enter your institutional email"
                 required
                 value={values.email}
                 onChange={(event) => update('email', event.target.value)}
@@ -393,6 +389,7 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                 className="cf-auth__input"
                 type="password"
                 autoComplete="current-password"
+                placeholder="Enter your password"
                 required
                 value={correctionPassword}
                 onChange={(event) => setCorrectionPassword(event.target.value)}
@@ -434,6 +431,7 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                   className="cf-auth__input"
                   type="text"
                   autoComplete="name"
+                  placeholder="Enter your full name"
                   required
                   value={values.name}
                   onChange={(event) => update('name', event.target.value)}
@@ -451,6 +449,7 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                     className="cf-auth__input"
                     type="text"
                     autoComplete="off"
+                    placeholder="Enter your student number"
                     maxLength={32}
                     required
                     value={values.student_number}
@@ -469,6 +468,7 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                   className="cf-auth__input"
                   type="email"
                   autoComplete="email"
+                  placeholder="Enter your institutional email"
                   required
                   value={values.email}
                   onChange={(event) => update('email', event.target.value)}
@@ -481,10 +481,15 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                 <legend className="cf-auth__legend">Academic placement</legend>
 
                 <div className="cf-auth__grid">
-                  <SelectField
+                  <CustomSelect
                     label="Program"
                     name="registration-program"
                     value={values.program_id}
+                    placeholder="Select your program"
+                    options={(options?.programs ?? []).map((program) => ({
+                      value: String(program.id),
+                      label: `${program.code} · ${program.name}`,
+                    }))}
                     error={firstError(fieldErrors, 'program_id')}
                     disabled={!options?.programs.length}
                     wide
@@ -493,70 +498,68 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                       update('year_level_id', '')
                       update('section_id', '')
                     }}
-                  >
-                    <option value="">Select a program</option>
-                    {options?.programs.map((program) => (
-                      <option key={program.id} value={program.id}>
-                        {program.code} · {program.name}
-                      </option>
-                    ))}
-                  </SelectField>
-                  <SelectField
+                  />
+                  <CustomSelect
                     label="Year level"
                     name="registration-year-level"
                     value={values.year_level_id}
+                    placeholder="Select your year level"
+                    options={availableYearLevels.map((yearLevel) => ({
+                      value: String(yearLevel.id),
+                      label: yearLevel.name,
+                    }))}
                     error={firstError(fieldErrors, 'year_level_id')}
                     disabled={!values.program_id || !availableYearLevels.length}
                     onChange={(value) => {
                       update('year_level_id', value)
                       update('section_id', '')
                     }}
-                  >
-                    <option value="">Select a year level</option>
-                    {availableYearLevels.map((yearLevel) => (
-                      <option key={yearLevel.id} value={yearLevel.id}>
-                        {yearLevel.name}
-                      </option>
-                    ))}
-                  </SelectField>
-                  <SelectField
+                  />
+                  <CustomSelect
                     label="Section"
                     name="registration-section"
                     value={values.section_id}
+                    placeholder="Select your section"
+                    options={availableSections.map((section) => ({
+                      value: String(section.id),
+                      label: section.name ? `${section.code} · ${section.name}` : section.code,
+                    }))}
                     error={firstError(fieldErrors, 'section_id')}
                     disabled={!values.year_level_id || !availableSections.length}
                     onChange={(value) => update('section_id', value)}
-                  >
-                  <option value="">Select a section</option>
-                  {availableSections.map((section) => (
-                    <option key={section.id} value={section.id}>
-                      {section.code}
-                      {section.name ? ` · ${section.name}` : ''}
-                    </option>
-                  ))}
-                </SelectField>
-              </div>
+                  />
+                </div>
             </fieldset>
           ) : (
             <fieldset className="cf-auth__fieldset">
               <legend className="cf-auth__legend">Professional information</legend>
 
               <div className="cf-auth__grid">
-                <SelectField
+                <CustomSelect
                   label="Employment type"
                   name="registration-employment-type"
                   value={values.employment_type}
+                  placeholder="Select your employment type"
+                  options={[
+                    { value: 'full_time', label: 'Full-time Professor' },
+                    { value: 'part_time', label: 'Part-time Professor' },
+                  ]}
                   onChange={(value) =>
                     update('employment_type', value as Values['employment_type'])
                   }
-                >
-                  <option value="full_time">Full-time Professor</option>
-                  <option value="part_time">Part-time Professor</option>
-                </SelectField>
-                <SelectField
+                />
+                <CustomSelect
                   label="Department affiliation"
                   name="registration-affiliation"
                   value={values.department_affiliation}
+                  placeholder="Select your affiliation"
+                  options={[
+                    {
+                      value: 'ccs',
+                      label: 'College of Computer Studies (CCS)',
+                    },
+                    { value: 'other', label: 'Other Department' },
+                  ]}
                   error={firstError(fieldErrors, 'department_affiliation')}
                   onChange={(value) => {
                     const affiliation = value as Values['department_affiliation']
@@ -571,32 +574,22 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                         : '',
                     )
                   }}
-                >
-                  <option value="">Select affiliation</option>
-                  <option value="ccs">College of Computer Studies (CCS)</option>
-                  <option value="other">Other Department</option>
-                </SelectField>
+                />
                 {values.department_affiliation === 'other' ? (
-                  <SelectField
+                  <CustomSelect
                     label="Other department"
                     name="registration-department"
                     value={values.department_id}
+                    placeholder="Select your department"
+                    options={availableDepartments.map((department) => ({
+                      value: String(department.id),
+                      label: department.name,
+                    }))}
                     error={firstError(fieldErrors, 'department_id')}
                     disabled={!availableDepartments.length}
-                    onChange={(value) => update('department_id', value)}
                     wide
-                  >
-                    <option value="">
-                      {availableDepartments.length
-                        ? 'Select a department'
-                        : 'No other departments are configured yet'}
-                    </option>
-                    {availableDepartments.map((department) => (
-                      <option key={department.id} value={department.id}>
-                        {department.name}
-                      </option>
-                    ))}
-                  </SelectField>
+                    onChange={(value) => update('department_id', value)}
+                  />
                 ) : null}
               </div>
             </fieldset>
@@ -618,6 +611,7 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                     className="cf-auth__input"
                     type="password"
                     autoComplete="new-password"
+                    placeholder="Enter your password"
                     minLength={12}
                     required
                     value={values.password}
@@ -634,6 +628,7 @@ export function RegistrationForm({ onBack }: RegistrationFormProps) {
                     className="cf-auth__input"
                     type="password"
                     autoComplete="new-password"
+                    placeholder="Re-enter your password"
                     minLength={12}
                     required
                     value={values.password_confirmation}
@@ -697,61 +692,6 @@ function Field({ label, name, error, hint, wide = false, children }: FieldProps)
       ) : hint ? (
         <p className="cf-auth__hint">{hint}</p>
       ) : null}
-    </div>
-  )
-}
-
-interface SelectFieldProps {
-  label: string
-  name: string
-  value: string
-  error?: string
-  disabled?: boolean
-  wide?: boolean
-  onChange: (value: string) => void
-  children: ReactNode
-}
-
-function SelectField({
-  label,
-  name,
-  value,
-  error,
-  disabled = false,
-  wide = false,
-  onChange,
-  children,
-}: SelectFieldProps) {
-  return (
-    <div className={wide ? 'cf-auth__field cf-auth__field--wide' : 'cf-auth__field'}>
-      <label className="cf-auth__label" htmlFor={name}>
-        {label}
-      </label>
-      <div className="cf-auth__control">
-        <select
-          id={name}
-          className="cf-auth__input"
-          required
-          value={value}
-          disabled={disabled}
-          aria-invalid={error ? true : undefined}
-          onChange={(event) => onChange(event.target.value)}
-        >
-          {children}
-        </select>
-        <span className="cf-auth__select-chevron" aria-hidden="true">
-          <svg viewBox="0 0 20 20" fill="none">
-            <path
-              d="M6 8.5 10 12.5 14 8.5"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-      </div>
-      {error ? <p className="cf-auth__field-error">{error}</p> : null}
     </div>
   )
 }
