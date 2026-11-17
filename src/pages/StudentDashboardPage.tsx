@@ -34,11 +34,6 @@ import {
   todaysSchedules,
 } from '@/utils/schedule'
 
-function attendanceRate(summary: OwnAttendanceSummary | null): number | null {
-  if (!summary || summary.summary.total === 0) return null
-  return Math.round((summary.summary.present / summary.summary.total) * 100)
-}
-
 export function StudentDashboardPage() {
   useDocumentTitle('Dashboard')
   const { user } = useAuth()
@@ -52,7 +47,6 @@ export function StudentDashboardPage() {
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
   const upcoming = nextClass(schedules, now)
   const today = todaysSchedules(schedules, now)
-  const rate = attendanceRate(attendanceSummary)
 
   useEffect(() => {
     let active = true
@@ -169,14 +163,10 @@ export function StudentDashboardPage() {
               <Alert tone="warning" title="Attendance unavailable">
                 {attendanceError}
               </Alert>
-            ) : attendanceSummary && attendanceSummary.summary.total > 0 && rate !== null ? (
+            ) : attendanceSummary && attendanceSummary.summary.total > 0 ? (
               <>
-                <p className="tabular text-4xl font-bold leading-none text-brand-800">
-                  {rate}%
-                </p>
-                <p className="mt-2 text-sm text-ink-muted">
-                  {attendanceSummary.summary.present} present of{' '}
-                  {attendanceSummary.summary.total} recorded sessions
+                <p className="text-sm text-ink-muted">
+                  Attendance is calculated separately for each subject offering.
                 </p>
                 <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-line pt-4 text-sm">
                   <div className="flex items-center justify-between gap-2">
@@ -204,6 +194,20 @@ export function StudentDashboardPage() {
                     </dd>
                   </div>
                 </dl>
+                <ul className="mt-4 space-y-3 border-t border-line pt-4">
+                  {attendanceSummary.by_subject.slice(0, 3).map((offering) => (
+                    <li key={offering.id} className="flex items-center justify-between gap-3 text-sm">
+                      <span className="min-w-0 truncate font-medium text-ink">
+                        {offering.code} · {offering.academic_term}
+                      </span>
+                      <span className="shrink-0 tabular text-ink-muted">
+                        {offering.attendance_percentage === null
+                          ? 'Pending'
+                          : `${offering.attendance_percentage}% · ${offering.weighted_contribution}/20`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
                 <LinkButton
                   to="/student/attendance"
                   variant="outline"

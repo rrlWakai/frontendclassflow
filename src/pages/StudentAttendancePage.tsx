@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import type { FormEvent } from 'react'
 import { CalendarDays, ChevronLeft, ChevronRight, ClipboardCheck, QrCode } from 'lucide-react'
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
@@ -6,17 +7,24 @@ import { Card, CardHeader } from '@/components/common/Card'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeading } from '@/components/common/PageHeading'
 import { StudentQrScanner } from '@/components/attendance/StudentQrScanner'
+import { useSchedules } from '@/hooks/useSchedules'
 import {
+  fetchEligibleAttendanceSessions,
+  fetchMyExcuseRequests,
   fetchMyAttendance,
   fetchMyAttendanceSummary,
+  submitAttendanceExcuse,
 } from '@/services/api/attendance'
 import type {
+  AttendanceExcuseRequest,
   AttendanceRecordItem,
+  AttendanceSession,
   AttendanceSummary,
   OwnAttendanceSummary,
 } from '@/types/attendance'
 import type { OwnAttendanceFilters } from '@/services/api/attendance'
 import { getApiErrorMessage } from '@/utils/apiError'
+import { formatTimeRange, nextClass, todaysSchedules } from '@/utils/schedule'
 
 const emptySummary: AttendanceSummary = {
   present: 0,
@@ -27,6 +35,7 @@ const emptySummary: AttendanceSummary = {
 }
 
 export function StudentAttendancePage() {
+  const { schedules, loading: schedulesLoading, error: schedulesError } = useSchedules()
   const [records, setRecords] = useState<AttendanceRecordItem[]>([])
   const [summary, setSummary] = useState<AttendanceSummary>(emptySummary)
   const [summaryDetails, setSummaryDetails] = useState<OwnAttendanceSummary | null>(null)
@@ -38,6 +47,15 @@ export function StudentAttendancePage() {
   const [error, setError] = useState<string | null>(null)
   const [refreshVersion, setRefreshVersion] = useState(0)
   const [scannerOpen, setScannerOpen] = useState(false)
+  const [eligibleSessions, setEligibleSessions] = useState<Array<{
+    session: AttendanceSession
+    qr_active: boolean
+    attendance: { status: 'present' | 'absent' | 'late' | 'excused'; check_in_at: string | null } | null
+  }>>([])
+  const [excuseRequests, setExcuseRequests] = useState<AttendanceExcuseRequest[]>([])
+  const [requestingSessionId, setRequestingSessionId] = useState<number | null>(null)
+  const [excuseReason, setExcuseReason] = useState('')
+  const [isSubmittingExcuse, setIsSubmittingExcuse] = useState(false)
 
   const closeScanner = useCallback(() => setScannerOpen(false), [])
   const handleQrRecorded = useCallback(
@@ -57,16 +75,20 @@ export function StudentAttendancePage() {
         return Promise.all([
           fetchMyAttendance(requestFilters),
           fetchMyAttendanceSummary(filters),
+          fetchEligibleAttendanceSessions(),
+          fetchMyExcuseRequests(),
         ])
       })
       .then((result) => {
         if (!active || !result) return
-        const [history, details] = result
+        const [history, details, eligible, excuses] = result
         setRecords(history.records)
         setSummary(history.summary)
         setLastPage(history.pagination.last_page)
         setTotal(history.pagination.total)
         setSummaryDetails(details)
+        setEligibleSessions(eligible)
+        setExcuseRequests(excuses)
       })
       .catch((failure: unknown) => {
         if (active) setError(getApiErrorMessage(failure, 'Unable to load your attendance history.'))
@@ -86,6 +108,23 @@ export function StudentAttendancePage() {
   ) {
     setPage(1)
     setFilters((current) => ({ ...current, [key]: value || undefined }))
+  }
+
+  async function submitExcuse(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (requestingSessionId === null || excuseReason.trim().length < 3) return
+    setIsSubmittingExcuse(true)
+    setError(null)
+    try {
+      await submitAttendanceExcuse(requestingSessionId, excuseReason.trim())
+      setRequestingSessionId(null)
+      setExcuseReason('')
+      setRefreshVersion((version) => version + 1)
+    } catch (failure) {
+      setError(getApiErrorMessage(failure, 'Unable to submit your excuse request.'))
+    } finally {
+      setIsSubmittingExcuse(false)
+    }
   }
 
   return (
@@ -127,6 +166,122 @@ export function StudentAttendancePage() {
         <div className="mb-5">
           <StudentQrScanner onClose={closeScanner} onRecorded={handleQrRecorded} />
         </div>
+      ) : null}
+
+      <div className="mb-5 grid gap-5 xl:grid-cols-3">
+        <Card className="p-5">
+          <CardHeader>
+            <h2 className="text-base font-semibold text-ink">My class schedule</h2>
+          </CardHeader>
+          {schedulesError ? (
+            <p role="alert" className="mt-3 text-sm text-red-700">{schedulesError}</p>
+          ) : schedulesLoading ? (
+            <p role="status" className="mt-3 text-sm text-ink-muted">Loading your schedule…</p>
+          ) : schedules.length === 0 ? (
+            <p className="mt-3 text-sm text-ink-muted">No published classes are assigned to your enrollment.</p>
+          ) : (
+            <>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">Today</p>
+              <ul className="mt-1 divide-y divide-line">
+                {todaysSchedules(schedules).map((schedule) => (
+                  <li key={schedule.id} className="py-2">
+                    <p className="text-sm font-medium text-ink">
+                      {schedule.offering.subject.code} · {schedule.offering.section.code}
+                    </p>
+                    <p className="mt-1 text-xs text-ink-muted">{formatTimeRange(schedule.start_time, schedule.end_time)}</p>
+                  </li>
+                ))}
+                {todaysSchedules(schedules).length === 0 ? (
+                  <li className="py-2 text-sm text-ink-muted">No classes scheduled today.</li>
+                ) : null}
+              </ul>
+              {nextClass(schedules) ? (
+                <p className="mt-3 border-t border-line pt-3 text-xs text-ink-muted">
+                  Next: {nextClass(schedules)?.schedule.offering.subject.code} ·{' '}
+                  {nextClass(schedules)?.startsInDays === 0
+                    ? 'today'
+                    : `in ${nextClass(schedules)?.startsInDays} day(s)`}
+                </p>
+              ) : null}
+            </>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <CardHeader>
+            <h2 className="text-base font-semibold text-ink">Today’s eligible sessions</h2>
+          </CardHeader>
+          {eligibleSessions.length === 0 ? (
+            <p className="mt-3 text-sm text-ink-muted">No attendance sessions are available for your classes today.</p>
+          ) : (
+            <ul className="mt-3 divide-y divide-line">
+              {eligibleSessions.map(({ session, qr_active, attendance }) => (
+                <li key={session.id} className="flex items-start justify-between gap-3 py-3">
+                  <div>
+                    <p className="font-medium text-ink">
+                      {session.offering.subject.code} · {session.offering.section.code}
+                    </p>
+                    <p className="mt-1 text-xs text-ink-muted">
+                      {session.schedule.start_time}–{session.schedule.end_time}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-right text-xs text-ink-muted">
+                    {attendance ? attendance.status : qr_active ? 'QR open' : 'QR closed'}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-5">
+          <CardHeader>
+            <h2 className="text-base font-semibold text-ink">Excuse requests</h2>
+          </CardHeader>
+          {excuseRequests.length === 0 ? (
+            <p className="mt-3 text-sm text-ink-muted">You have no excuse requests.</p>
+          ) : (
+            <ul className="mt-3 max-h-56 divide-y divide-line overflow-y-auto">
+              {excuseRequests.slice(0, 8).map((request) => (
+                <li key={request.id} className="py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm font-medium text-ink">
+                      {request.subject?.code ?? 'Class'} · {request.session?.class_date ?? 'Meeting'}
+                    </p>
+                    <span className="text-xs capitalize text-ink-muted">{request.status}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-ink-muted">{request.decision_reason ?? request.reason}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      {requestingSessionId !== null ? (
+        <form onSubmit={(event) => void submitExcuse(event)} className="mb-5 rounded-xl border border-line bg-white p-4">
+          <label className="block space-y-1.5 text-sm font-medium text-ink">
+            Reason for excuse request
+            <textarea
+              required
+              minLength={3}
+              maxLength={4000}
+              rows={3}
+              value={excuseReason}
+              onChange={(event) => setExcuseReason(event.target.value)}
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm font-normal"
+              placeholder="Explain why you could not attend this class."
+            />
+          </label>
+          <div className="mt-3 flex justify-end gap-2">
+            <Button type="button" size="sm" variant="outline" onClick={() => setRequestingSessionId(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" size="sm" isLoading={isSubmittingExcuse}>
+              Submit request
+            </Button>
+          </div>
+        </form>
       ) : null}
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -255,6 +410,18 @@ export function StudentAttendancePage() {
                       </div>
                       <Badge tone={attendance.status === 'present' ? 'success' : attendance.status === 'absent' ? 'danger' : attendance.status === 'late' ? 'warning' : 'flow'}>{attendance.status}</Badge>
                     </div>
+                    {attendance.status === 'absent' &&
+                    !excuseRequests.some((request) =>
+                      request.attendance_session_id === session.id &&
+                      request.student_subject_enrollment_id === attendance.student_subject_enrollment_id,
+                    ) ? (
+                      <Button type="button" size="sm" variant="outline" onClick={() => {
+                        setRequestingSessionId(session.id)
+                        setExcuseReason('')
+                      }}>
+                        Request excuse
+                      </Button>
+                    ) : null}
                     <div className="grid grid-cols-2 gap-3 text-xs text-ink-muted">
                       <div><p className="font-semibold uppercase tracking-wide text-[10px] text-ink-muted">Class meeting</p><p className="mt-1 text-ink">{session.class_date}</p><p>{session.schedule.start_time}–{session.schedule.end_time}</p></div>
                       <div><p className="font-semibold uppercase tracking-wide text-[10px] text-ink-muted">Notes</p><p className="mt-1 leading-5 text-ink">{attendance.remarks ?? 'No notes'}</p></div>
@@ -306,6 +473,24 @@ export function StudentAttendancePage() {
                         </td>
                         <td className="max-w-56 px-4 py-4 text-xs leading-5 text-ink-muted">
                           {attendance.remarks ?? '—'}
+                          {attendance.status === 'absent' &&
+                          !excuseRequests.some((request) =>
+                            request.attendance_session_id === session.id &&
+                            request.student_subject_enrollment_id === attendance.student_subject_enrollment_id,
+                          ) ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="mt-2"
+                              onClick={() => {
+                                setRequestingSessionId(session.id)
+                                setExcuseReason('')
+                              }}
+                            >
+                              Request excuse
+                            </Button>
+                          ) : null}
                         </td>
                       </tr>
                     ))}
@@ -353,10 +538,22 @@ export function StudentAttendancePage() {
             <ul className="mt-3 space-y-3">
               {summaryDetails.by_subject.map((subject) => (
                 <li key={subject.id} className="rounded-xl border border-line p-3">
-                  <p className="font-semibold text-ink">{subject.code} · {subject.title}</p>
+                <p className="font-semibold text-ink">{subject.code} · {subject.title}</p>
+                <p className="mt-1 text-xs text-ink-muted">{subject.academic_term}</p>
                   <p className="mt-1 text-xs text-ink-muted">
                     {subject.present} present · {subject.absent} absent · {subject.late} late · {subject.excused} excused
                   </p>
+                <p className="mt-2 text-xs text-ink-muted">
+                  {subject.attendance_percentage === null
+                    ? 'Attendance percentage pending'
+                    : `${subject.attendance_percentage}% attendance · ${subject.weighted_contribution}/20`}
+                </p>
+                <p className="mt-1 text-xs text-ink-muted">
+                  {subject.absent} actual absences · {subject.late_absence_equivalents} late-derived ·{' '}
+                  {subject.absence_equivalents} total equivalents · {subject.allowed_absences === null
+                    ? 'allowance not configured'
+                    : `${subject.allowed_absences} allowed · ${subject.remaining_absences} remaining${subject.allowance_exceeded ? ' · exceeded' : ''}`}
+                </p>
                 </li>
               ))}
             </ul>

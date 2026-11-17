@@ -8,6 +8,15 @@ export interface AnnouncementFeedItem {
   published_at: string | null
   expires_at: string | null
   author: { id: number; name: string }
+  activity_id?: number | null
+  activity?: {
+    id: number
+    title: string
+    category: string
+    status: string
+    starts_at: string
+    ends_at: string
+  } | null
 }
 
 export interface AnnouncementDetail extends AnnouncementFeedItem {

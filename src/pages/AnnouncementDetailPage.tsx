@@ -165,6 +165,16 @@ export function AnnouncementDetailPage() {
           <p className="mt-3 text-sm text-ink-muted">
             {announcement.author.name} · {formatDate(announcement.published_at)}
           </p>
+          {announcement.activity ? (
+            <p className="mt-2 text-sm">
+              <Link
+                to={`/${role}/activities/${announcement.activity.id}`}
+                className="rounded-sm font-medium text-flow-700 hover:text-flow-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flow-600"
+              >
+                Related activity: {announcement.activity.title}
+              </Link>
+            </p>
+          ) : null}
           {announcement.summary ? (
             <p className="mt-6 border-l-2 border-flow-400 pl-4 text-base font-medium leading-7 text-ink">
               {announcement.summary}

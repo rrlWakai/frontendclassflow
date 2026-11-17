@@ -469,7 +469,9 @@ export function StudentQrScanner({ onClose, onRecorded }: StudentQrScannerProps)
         <div className="flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
           <CheckCircle2 className="size-8" aria-hidden="true" />
         </div>
-        <h3 className="mt-4 text-xl font-semibold text-emerald-900">Attendance recorded</h3>
+        <h3 className="mt-4 text-xl font-semibold text-emerald-900">
+          {result.already_recorded ? 'Attendance already recorded' : 'Attendance recorded'}
+        </h3>
         <p className="mt-2 max-w-sm text-sm leading-6 text-emerald-800">
           {result.session.offering.subject.code} - {result.session.offering.section.code} on{' '}
           {result.session.class_date}.

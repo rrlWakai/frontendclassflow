@@ -8,7 +8,9 @@ import { ConfirmationDialog } from '@/components/common/ConfirmationDialog'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeading } from '@/components/common/PageHeading'
 import { ProfessorQrPanel } from '@/components/attendance/ProfessorQrPanel'
+import { ProfessorOfferingLedger } from '@/components/attendance/ProfessorOfferingLedger'
 import { useSchedules } from '@/hooks/useSchedules'
+import { dayLabels, getManilaNow, timeToMinutes } from '@/utils/schedule'
 import {
   createAttendanceSession,
   fetchAttendanceSession,
@@ -29,15 +31,16 @@ interface AttendanceDraft {
   remarks: string
 }
 
-const statuses: AttendanceStatus[] = ['present', 'absent', 'late', 'excused']
+const statuses: AttendanceStatus[] = ['present', 'absent', 'late']
 
 function localDateValue(): string {
-  const date = new Date()
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0'),
-  ].join('-')
+  return getManilaNow().dateKey
+}
+
+function manilaDateOffset(dateKey: string, offset: number): string {
+  const date = new Date(`${dateKey}T12:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + offset)
+  return date.toISOString().slice(0, 10)
 }
 
 export function ProfessorAttendancePage() {
@@ -125,6 +128,16 @@ export function ProfessorAttendancePage() {
   }, [selectedSessionId])
 
   const activeScheduleId = selectedScheduleId || (schedules[0] ? String(schedules[0].id) : '')
+  const manilaNow = getManilaNow()
+  const todaySchedules = schedules.filter((schedule) => schedule.day_of_week === manilaNow.dayOfWeek)
+  const upcomingSchedules = schedules.flatMap((schedule) => {
+    let offset = (schedule.day_of_week - manilaNow.dayOfWeek + 7) % 7
+    if (offset === 0 && timeToMinutes(schedule.start_time) <= manilaNow.minutes) offset = 7
+    return offset > 0 && offset <= 7
+      ? [{ schedule, date: manilaDateOffset(manilaNow.dateKey, offset) }]
+      : []
+  }).sort((left, right) => left.date.localeCompare(right.date) ||
+    left.schedule.start_time.localeCompare(right.schedule.start_time))
 
   async function handleCreateSession(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -246,7 +259,7 @@ export function ProfessorAttendancePage() {
     })
   }
 
-  async function handleSave(submitSession = false) {
+  async function handleSave() {
     if (!detail || !allStudentsMarked) return
 
     setIsSaving(true)
@@ -258,10 +271,6 @@ export function ProfessorAttendancePage() {
         recordsPayload(),
         detail.session.status === 'submitted' ? correctionReason.trim() : undefined,
       )
-
-      if (submitSession) {
-        await updateAttendanceSessionStatus(detail.session.id, 'submitted')
-      }
 
       setDetail(await fetchAttendanceSession(detail.session.id))
       setCorrectionReason('')
@@ -345,40 +354,82 @@ return (
                 description="Attendance entry is available after a schedule is published for your assignment."
               />
             ) : (
-              <form className="mt-4 space-y-4" onSubmit={(event) => void handleCreateSession(event)}>
-                <label className="block space-y-1.5 text-sm font-medium text-ink">
-                  Published class
-                  <select
-                    value={activeScheduleId}
-                    onChange={(event) => setSelectedScheduleId(event.target.value)}
-                    className="h-11 w-full rounded-lg border border-line bg-white px-3 text-sm"
-                  >
-                    {schedules.map((schedule) => (
-                      <option key={schedule.id} value={schedule.id}>
-                        {schedule.offering.subject.code} · {schedule.offering.section.code} · {schedule.start_time}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="block space-y-1.5 text-sm font-medium text-ink">
-                  Class date
-                  <input
-                    type="date"
-                    required
-                    max={localDateValue()}
-                    min={schedules.find((schedule) => String(schedule.id) === activeScheduleId)?.offering.academic_term.starts_on}
-                    value={classDate}
-                    onChange={(event) => setClassDate(event.target.value)}
-                    className="h-11 w-full rounded-lg border border-line bg-white px-3 text-sm"
-                  />
-                </label>
-                {fieldErrors.class_date?.[0] ? (
-                  <p className="text-xs font-medium text-red-600">{fieldErrors.class_date[0]}</p>
-                ) : null}
-                <Button type="submit" className="w-full" isLoading={isCreating}>
-                  Create attendance session
-                </Button>
-              </form>
+              <>
+                <form className="mt-4 space-y-4" onSubmit={(event) => void handleCreateSession(event)}>
+                  <label className="block space-y-1.5 text-sm font-medium text-ink">
+                    Published class
+                    <select
+                      value={activeScheduleId}
+                      onChange={(event) => setSelectedScheduleId(event.target.value)}
+                      className="h-11 w-full rounded-lg border border-line bg-white px-3 text-sm"
+                    >
+                      {schedules.map((schedule) => (
+                        <option key={schedule.id} value={schedule.id}>
+                          {schedule.offering.subject.code} · {schedule.offering.section.code} · {schedule.start_time}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block space-y-1.5 text-sm font-medium text-ink">
+                    Class date
+                    <input
+                      type="date"
+                      required
+                      max={localDateValue()}
+                      min={schedules.find((schedule) => String(schedule.id) === activeScheduleId)?.offering.academic_term.starts_on}
+                      value={classDate}
+                      onChange={(event) => setClassDate(event.target.value)}
+                      className="h-11 w-full rounded-lg border border-line bg-white px-3 text-sm"
+                    />
+                  </label>
+                  {fieldErrors.class_date?.[0] ? (
+                    <p className="text-xs font-medium text-red-600">{fieldErrors.class_date[0]}</p>
+                  ) : null}
+                  <Button type="submit" className="w-full" isLoading={isCreating}>
+                    Create attendance session
+                  </Button>
+                </form>
+
+                <div className="mt-6 border-t border-line pt-4">
+                  <h3 className="text-sm font-semibold text-ink">Today’s classes</h3>
+                  {todaySchedules.length ? (
+                    <ul className="mt-2 divide-y divide-line">
+                      {todaySchedules.map((schedule) => (
+                        <li key={schedule.id} className="flex items-center justify-between gap-3 py-2.5">
+                          <span className="text-sm text-ink">
+                            {schedule.offering.subject.code} · {schedule.offering.section.code}
+                            <span className="ml-2 text-xs text-ink-muted">{schedule.start_time}</span>
+                          </span>
+                          <Button type="button" size="sm" variant="outline" onClick={() => {
+                            setSelectedScheduleId(String(schedule.id))
+                            setClassDate(manilaNow.dateKey)
+                          }}>
+                            Select
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-2 text-sm text-ink-muted">No assigned classes today.</p>
+                  )}
+                  <h3 className="mt-5 text-sm font-semibold text-ink">Upcoming classes</h3>
+                  {upcomingSchedules.length ? (
+                    <ul className="mt-2 divide-y divide-line">
+                      {upcomingSchedules.slice(0, 6).map(({ schedule, date }) => (
+                        <li key={`${schedule.id}-${date}`} className="flex items-center justify-between gap-3 py-2.5">
+                          <span className="text-sm text-ink">
+                            {schedule.offering.subject.code} · {schedule.offering.section.code}
+                            <span className="ml-2 text-xs text-ink-muted">{date} · {schedule.start_time}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-2 text-sm text-ink-muted">No upcoming classes in the next seven days.</p>
+                  )}
+                  <p className="mt-3 text-xs text-ink-muted">{dayLabels[manilaNow.dayOfWeek - 1]} · Asia/Manila</p>
+                </div>
+              </>
             )}
           </Card>
 
@@ -587,6 +638,9 @@ return (
                                 {statuses.map((status) => (
                                   <option key={status} value={status}>{status}</option>
                                 ))}
+                                {entry.attendance?.status === 'excused' ? (
+                                  <option value="excused">excused</option>
+                                ) : null}
                               </select>
                             ) : (
                               <Badge tone={entry.attendance ? 'success' : 'neutral'}>
@@ -683,28 +737,6 @@ return (
                     >
                       Save draft
                     </Button>
-                    <Button
-                      type="button"
-                      isLoading={isSaving}
-                      disabled={!allStudentsMarked}
-                      onClick={() => {
-                        if (!detail) return
-                        setConfirmDialog({
-                          variant: 'confirm',
-                          title: 'Submit attendance',
-                          description: 'Finalize attendance for this session. You can still correct it later with a reason.',
-                          confirmLabel: 'Submit attendance',
-                          cancelLabel: 'Keep as draft',
-                          destructive: false,
-                          onConfirm: () => {
-                            setConfirmDialog(null)
-                            void handleSave(true)
-                          },
-                        })
-                      }}
-                    >
-                      Submit attendance
-                    </Button>
                   </>
                 ) : detail.session.status === 'submitted' ? (
                   <Button
@@ -727,6 +759,8 @@ return (
           )}
         </Card>
       </div>
+
+      <ProfessorOfferingLedger schedules={schedules} />
 
       {confirmDialog && (
         <ConfirmationDialog

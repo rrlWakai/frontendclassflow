@@ -4,10 +4,12 @@ import type {
   AttendanceQrCheckInResult,
   AttendanceQrStartResult,
   AttendanceQrStatus,
+  AttendanceExcuseRequest,
   AttendanceRecordItem,
   AttendanceSession,
   AttendanceSessionDetail,
   AttendanceStatus,
+  OfferingAttendanceLedger,
   OwnAttendanceSummary,
 } from '@/types/attendance'
 import { apiClient } from '@/services/api/client'
@@ -136,4 +138,74 @@ export async function submitAttendanceQr(
     { token },
   )
   return data.data
+}
+
+export async function fetchEligibleAttendanceSessions(): Promise<Array<{
+  session: AttendanceSession
+  qr_active: boolean
+  attendance: { status: AttendanceStatus; check_in_at: string | null } | null
+}>> {
+  const { data } = await apiClient.get<ApiSuccessResponse<{ sessions: Array<{
+    session: AttendanceSession
+    qr_active: boolean
+    attendance: { status: AttendanceStatus; check_in_at: string | null } | null
+  }> }>>('/attendance/sessions/eligible/me')
+  return data.data.sessions
+}
+
+export async function exportOfferingAttendanceLedger(offeringId: number): Promise<Blob> {
+  const { data } = await apiClient.get<Blob>(
+    `/attendance/offerings/${offeringId}/ledger/export`,
+    { responseType: 'blob' },
+  )
+  return data
+}
+
+export async function fetchOfferingAttendanceLedger(
+  offeringId: number,
+): Promise<OfferingAttendanceLedger> {
+  const { data } = await apiClient.get<ApiSuccessResponse<OfferingAttendanceLedger>>(
+    `/attendance/offerings/${offeringId}/ledger`,
+  )
+  return data.data
+}
+
+export async function fetchMyExcuseRequests(): Promise<AttendanceExcuseRequest[]> {
+  const { data } = await apiClient.get<ApiSuccessResponse<{
+    requests: AttendanceExcuseRequest[]
+  }>>('/attendance/excuses/me')
+  return data.data.requests
+}
+
+export async function submitAttendanceExcuse(
+  sessionId: number,
+  reason: string,
+): Promise<AttendanceExcuseRequest> {
+  const { data } = await apiClient.post<ApiSuccessResponse<{
+    request: AttendanceExcuseRequest
+  }>>(`/attendance/sessions/${sessionId}/excuses`, { reason })
+  return data.data.request
+}
+
+export async function fetchOfferingExcuses(
+  offeringId: number,
+): Promise<AttendanceExcuseRequest[]> {
+  const { data } = await apiClient.get<ApiSuccessResponse<{
+    requests: AttendanceExcuseRequest[]
+  }>>(`/attendance/offerings/${offeringId}/excuses`)
+  return data.data.requests
+}
+
+export async function decideAttendanceExcuse(
+  excuseId: number,
+  status: 'approved' | 'rejected',
+  decisionReason: string,
+): Promise<AttendanceExcuseRequest> {
+  const { data } = await apiClient.patch<ApiSuccessResponse<{
+    request: AttendanceExcuseRequest
+  }>>(`/attendance/excuses/${excuseId}/decision`, {
+    status,
+    decision_reason: decisionReason,
+  })
+  return data.data.request
 }

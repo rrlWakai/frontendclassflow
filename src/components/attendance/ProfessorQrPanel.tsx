@@ -27,7 +27,14 @@ interface ProfessorQrPanelProps {
 }
 
 function formatCountdown(seconds: number): string {
-  return `0:${String(Math.max(0, seconds)).padStart(2, '0')}`
+  const safeSeconds = Math.max(0, seconds)
+  const hours = Math.floor(safeSeconds / 3600)
+  const minutes = Math.floor((safeSeconds % 3600) / 60)
+  const remainder = safeSeconds % 60
+
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`
+    : `${minutes}:${String(remainder).padStart(2, '0')}`
 }
 
 export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
@@ -156,6 +163,9 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
   const secondsLeft = qrStatus?.expires_at
     ? Math.max(0, Math.ceil((new Date(qrStatus.expires_at).getTime() - nowTick) / 1000))
     : 0
+  const deadlineSeconds = qrStatus?.deadline_at
+    ? Math.max(0, Math.ceil((new Date(qrStatus.deadline_at).getTime() - nowTick) / 1000))
+    : 0
   const monitoring = qrStatus?.monitoring
   const sessionOpen = session.status === 'open'
 
@@ -227,10 +237,12 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
               </p>
               <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-flow-200 bg-flow-50 px-3 py-1.5 text-sm font-semibold text-flow-800">
                 <Clock className="size-4" aria-hidden="true" />
-                {qrImage ? `${formatCountdown(secondsLeft)} remaining` : 'Preparing a fresh code'}
+                {qrImage ? `Code refreshes in ${formatCountdown(secondsLeft)}` : 'Preparing a fresh code'}
               </div>
               <p className="mt-3 max-w-sm text-xs leading-5 text-ink-muted">
-                Display this code. It refreshes automatically before expiring.
+                Scanning closes at {qrStatus.deadline_at
+                  ? new Date(qrStatus.deadline_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                  : 'the grace deadline'} ({formatCountdown(deadlineSeconds)} remaining).
               </p>
             </div>
 
@@ -241,8 +253,9 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
                     {(
                       [
                         ['Enrolled', monitoring.total_enrolled, Users],
-                        ['Checked in', monitoring.checked_in, CheckCircle2],
-                        ['Not checked in', monitoring.not_checked_in, Clock],
+                        ['Present', monitoring.present, CheckCircle2],
+                        ['Late', monitoring.late, Clock],
+                        ['Absent', monitoring.absent, Clock],
                         ['Attendance', `${monitoring.percentage}%`, QrCode],
                       ] as Array<[string, string | number, LucideIcon]>
                     ).map(([label, value, Icon]) => (

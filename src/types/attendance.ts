@@ -1,6 +1,6 @@
 export type AttendanceStatus = 'present' | 'absent' | 'late' | 'excused'
 export type AttendanceSessionStatus = 'open' | 'submitted' | 'cancelled'
-export type AttendanceSubmissionSource = 'manual' | 'qr'
+export type AttendanceSubmissionSource = 'manual' | 'qr' | 'system'
 
 export interface AttendanceSession {
   id: number
@@ -19,6 +19,7 @@ export interface AttendanceSession {
     start_time: string
     end_time: string
     status: string
+    rooms: Array<{ id: number; code: string; name: string | null }>
   }
   offering: {
     id: number
@@ -103,11 +104,20 @@ export interface OwnAttendanceSummary {
     id: number
     code: string
     title: string
+    academic_term_id: number
+    academic_term: string
     total: number
     present: number
     absent: number
     late: number
     excused: number
+    late_absence_equivalents: number
+    absence_equivalents: number
+    attendance_percentage: number | null
+    weighted_contribution: number | null
+    allowed_absences: number | null
+    remaining_absences: number | null
+    allowance_exceeded: boolean
   }>
   terms: Array<{
     id: number
@@ -138,6 +148,10 @@ export interface AttendanceQrCheckedInStudent {
 export interface AttendanceQrMonitoring {
   total_enrolled: number
   checked_in: number
+  present: number
+  late: number
+  absent: number
+  excused: number
   not_checked_in: number
   percentage: number
   checked_in_students: AttendanceQrCheckedInStudent[]
@@ -148,6 +162,7 @@ export interface AttendanceQrStatus {
   opened_at: string | null
   closed_at: string | null
   expires_at: string | null
+  deadline_at: string | null
   token_ttl_seconds: number
   monitoring: AttendanceQrMonitoring
 }
@@ -160,4 +175,78 @@ export interface AttendanceQrStartResult {
 export interface AttendanceQrCheckInResult {
   attendance: AttendanceRecord
   session: AttendanceSession
+  already_recorded: boolean
+}
+
+export interface AttendanceLedgerStudent {
+  student: {
+    id: number
+    student_subject_enrollment_id: number
+    student_number: string
+    name: string
+  }
+  present: number
+  late: number
+  absent: number
+  excused: number
+  late_absence_equivalents: number
+  absence_equivalents: number
+  eligible_meetings: number
+  attendance_percentage: number | null
+  weighted_contribution: number | null
+  allowed_absences: number | null
+  remaining_absences: number | null
+  allowance_exceeded: boolean
+}
+
+export interface OfferingAttendanceLedger {
+  offering: {
+    id: number
+    subject: { id: number; code: string; title: string }
+    section: { id: number; code: string; name: string | null }
+    academic_term: {
+      id: number
+      academic_year: string
+      name: string
+      starts_on: string
+      ends_on: string
+    }
+  }
+  held_meetings: number
+  incomplete_meetings: Array<{
+    date: string
+    schedule_id: number
+    start_time: string
+    end_time: string
+  }>
+  meetings: Array<{
+    date: string
+    schedule_id: number
+    session_id: number | null
+    state: 'incomplete' | 'held' | 'in_progress'
+    start_time: string
+    end_time: string
+  }>
+  policy: { allowed_absences: number; effective_at: string; scope: 'institutional' | 'offering' } | null
+  students: AttendanceLedgerStudent[]
+}
+
+export interface AttendanceExcuseRequest {
+  id: number
+  attendance_session_id: number
+  student_subject_enrollment_id: number
+  student?: { id: number; student_number: string; name: string | null } | null
+  session: AttendanceSession | null
+  subject: { code: string; title: string; section: string } | null
+  reason: string
+  status: 'pending' | 'approved' | 'rejected'
+  decision_reason: string | null
+  decided_at: string | null
+  changes: Array<{
+    previous_status: string | null
+    new_status: string
+    reason: string
+    changed_by: string | null
+    changed_at: string | null
+  }>
 }
