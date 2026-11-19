@@ -3,6 +3,7 @@ import {
   ClipboardCheck,
   LayoutDashboard,
   Megaphone,
+  QrCode,
   Sparkles,
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
@@ -17,6 +18,7 @@ interface NavItem {
 const teachingLinks: NavItem[] = [
   { to: '/professor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/professor/attendance', label: 'Attendance', icon: ClipboardCheck },
+  { to: '/professor/room-scanner', label: 'Room scanner', icon: QrCode },
 ]
 
 const campusLinks: NavItem[] = [
@@ -30,7 +32,7 @@ export function ProfessorSidebar() {
       'relative flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-gold-400',
       isActive
         ? 'bg-white/10 text-white before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-gold-400'
-        : 'text-[#d9c7c9] hover:bg-white/5 hover:text-white',
+        : 'text-brand-100 hover:bg-white/5 hover:text-white',
     ].join(' ')
 
   return (
