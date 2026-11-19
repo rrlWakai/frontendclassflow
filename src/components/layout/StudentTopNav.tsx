@@ -1,4 +1,4 @@
-import { ClipboardCheck, LayoutDashboard, LogOut, Megaphone, Sparkles } from 'lucide-react'
+import { ClipboardCheck, GraduationCap, LayoutDashboard, LogOut, Megaphone, Sparkles } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { Logo } from '@/components/layout/Logo'
 import { useAuth } from '@/hooks/useAuth'
@@ -8,6 +8,7 @@ import { initials } from '@/utils/format'
 const links = [
   { to: '/student/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/student/attendance', label: 'Attendance', icon: ClipboardCheck },
+  { to: '/student/placement', label: 'Placement', icon: GraduationCap },
   { to: '/student/announcements', label: 'Announcements', icon: Megaphone },
   { to: '/student/activities', label: 'Activities', icon: Sparkles },
 ]

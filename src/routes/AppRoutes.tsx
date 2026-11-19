@@ -9,8 +9,10 @@ import { ActivityDetailPage } from '@/pages/ActivityDetailPage'
 import { ActivitiesPage } from '@/pages/ActivitiesPage'
 import { RoleLoginPage } from '@/pages/RoleLoginPage'
 import { ProfessorAttendancePage } from '@/pages/ProfessorAttendancePage'
+import { ProfessorRoomScannerPage } from '@/pages/ProfessorRoomScannerPage'
 import { StudentAttendancePage } from '@/pages/StudentAttendancePage'
 import { StudentDashboardPage } from '@/pages/StudentDashboardPage'
+import { StudentPlacementPage } from '@/pages/StudentPlacementPage'
 import { RequireRole } from '@/routes/RequireRole'
 
 export function AppRoutes() {
@@ -33,6 +35,11 @@ export function AppRoutes() {
             path="attendance"
             element={<ProfessorAttendancePage />}
             handle={{ title: 'Attendance' }}
+          />
+          <Route
+            path="room-scanner"
+            element={<ProfessorRoomScannerPage />}
+            handle={{ title: 'Room scanner' }}
           />
           <Route
             path="announcements"
@@ -69,6 +76,11 @@ export function AppRoutes() {
             path="attendance"
             element={<StudentAttendancePage />}
             handle={{ title: 'My attendance' }}
+          />
+          <Route
+            path="placement"
+            element={<StudentPlacementPage />}
+            handle={{ title: 'My placement' }}
           />
           <Route
             path="announcements"
