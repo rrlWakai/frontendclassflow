@@ -1,4 +1,5 @@
-import { LogOut } from 'lucide-react'
+import type { RefObject } from 'react'
+import { LogOut, Menu } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 import { Logo } from '@/components/layout/Logo'
 import { useAuth } from '@/hooks/useAuth'
@@ -11,13 +12,23 @@ const pageLabels: Record<string, string> = {
   '/professor/activities': 'Activities',
 }
 
+interface ProfessorTopbarProps {
+  onMenuClick?: () => void
+  mobileOpen?: boolean
+  menuButtonRef?: RefObject<HTMLButtonElement | null>
+}
+
 function currentPage(pathname: string): string {
   if (pathname.startsWith('/professor/announcements')) return 'Announcements'
   if (pathname.startsWith('/professor/activities')) return 'Activities'
   return pageLabels[pathname] ?? 'Professor workspace'
 }
 
-export function ProfessorTopbar() {
+export function ProfessorTopbar({
+  onMenuClick,
+  mobileOpen = false,
+  menuButtonRef,
+}: ProfessorTopbarProps = {}) {
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
   const departmentLabel =
@@ -27,6 +38,18 @@ export function ProfessorTopbar() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-canvas/95 px-4 backdrop-blur md:px-6 lg:px-8">
+      <button
+        ref={menuButtonRef}
+        type="button"
+        onClick={onMenuClick}
+        aria-label="Open navigation"
+        aria-controls={mobileOpen ? 'professor-mobile-navigation' : undefined}
+        aria-expanded={mobileOpen}
+        className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-subtle hover:text-ink md:hidden"
+      >
+        <Menu className="size-5" aria-hidden="true" />
+      </button>
+
       <Logo variant="onLight" compact className="md:hidden" />
 
       <div className="min-w-0">
