@@ -25,3 +25,13 @@ export async function checkInToRoom(
 
   return data.data
 }
+
+export async function fetchMyRoomUsage(): Promise<{ occupancies: RoomCheckInResult['occupancy'][]; pagination: { total: number } }> {
+  const { data } = await apiClient.get<ApiSuccessResponse<{ occupancies: RoomCheckInResult['occupancy'][]; pagination: { total: number } }>>('/room-monitoring/history')
+  return data.data
+}
+
+export async function endRoomUsage(): Promise<RoomCheckInResult> {
+  const { data } = await apiClient.post<ApiSuccessResponse<RoomCheckInResult>>('/room-monitoring/end')
+  return data.data
+}

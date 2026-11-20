@@ -47,6 +47,7 @@ export interface RoomCheckInResult {
     checked_out_at: string | null
     mismatch_reason: string | null
     discrepancy_status: 'none' | 'open' | 'resolved'
+    duration_seconds?: number | null
   }
-  already_checked_in: boolean
+  already_checked_in?: boolean
 }

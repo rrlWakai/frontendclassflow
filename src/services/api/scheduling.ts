@@ -6,7 +6,7 @@ import { apiClient } from '@/services/api/client'
 export async function fetchMySchedules(): Promise<MySchedule[]> {
   const { data } = await apiClient.get<ApiSuccessResponse<{ schedules: MySchedule[] }>>('/schedules/me')
 
-  return data.data.schedules
+  return data.data.schedules.filter((schedule) => schedule.status === 'published')
 }
 
 export async function fetchMyScheduleConflicts(): Promise<MyScheduleConflictPage> {

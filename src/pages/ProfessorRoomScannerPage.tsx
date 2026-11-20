@@ -4,7 +4,7 @@ import { AlertTriangle, Camera, CheckCircle2, LoaderCircle, QrCode } from 'lucid
 import { Button } from '@/components/common/Button'
 import { Card, CardBody } from '@/components/common/Card'
 import { PageHeading } from '@/components/common/PageHeading'
-import { checkInToRoom, previewRoomCheckIn } from '@/services/api/roomMonitoring'
+import { checkInToRoom, endRoomUsage, fetchMyRoomUsage, previewRoomCheckIn } from '@/services/api/roomMonitoring'
 import type { RoomCheckInResult, RoomMonitoringPreview } from '@/types/roomMonitoring'
 import { getApiErrorMessage } from '@/utils/apiError'
 
@@ -30,6 +30,8 @@ export function ProfessorRoomScannerPage() {
   const [qrIdentifier, setQrIdentifier] = useState<string | null>(null)
   const [mismatchReason, setMismatchReason] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [activeUsage, setActiveUsage] = useState<RoomCheckInResult['occupancy'] | null>(null)
+  const [history, setHistory] = useState<RoomCheckInResult['occupancy'][]>([])
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -157,6 +159,14 @@ export function ProfessorRoomScannerPage() {
 
   useEffect(() => () => stopCamera(), [stopCamera])
 
+  useEffect(() => {
+    void fetchMyRoomUsage().then((data) => {
+      setHistory(data.occupancies)
+      const current = data.occupancies.find((item) => !item.checked_out_at && item.scheduled_end_at && new Date(item.scheduled_end_at) > new Date())
+      setActiveUsage(current ?? null)
+    }).catch(() => undefined)
+  }, [result])
+
   async function submitCheckIn() {
     if (!preview || !qrIdentifier) return
     setState('saving')
@@ -167,6 +177,7 @@ export function ProfessorRoomScannerPage() {
         mismatchReason.trim() || undefined,
       )
       setResult(checkedIn)
+      setActiveUsage(checkedIn.occupancy)
       setState('success')
     } catch (failure) {
       setError(getApiErrorMessage(failure, 'Room check-in could not be completed.'))
@@ -198,6 +209,12 @@ export function ProfessorRoomScannerPage() {
 
       <Card>
         <CardBody className="space-y-5">
+          {activeUsage ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-flow-200 bg-flow-50 p-4">
+              <div><p className="font-semibold">Active room usage · {activeUsage.room.code}</p><p className="text-sm text-ink-muted">Checked in {activeUsage.checked_in_at ? formatTime(activeUsage.checked_in_at) : '—'}</p></div>
+              <Button variant="outline" onClick={() => void endRoomUsage().then((ended) => { setActiveUsage(null); setResult(ended); setState('success') }).catch((failure) => setError(getApiErrorMessage(failure, 'Unable to end room usage.')))}>End room usage</Button>
+            </div>
+          ) : null}
           {state === 'success' && result ? (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
               <div className="flex items-center gap-3 text-emerald-900">
@@ -347,6 +364,14 @@ export function ProfessorRoomScannerPage() {
             </>
           )}
           <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+        </CardBody>
+      </Card>
+      <Card className="mt-6">
+        <CardBody>
+          <h2 className="font-semibold">My room usage history</h2>
+          {history.length === 0 ? <p className="mt-3 text-sm text-ink-muted">No room usage records yet.</p> : (
+            <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[620px] text-left text-sm"><thead><tr className="border-b border-line text-xs uppercase text-ink-muted"><th className="px-2 py-2">Room</th><th className="px-2 py-2">Class</th><th className="px-2 py-2">Start</th><th className="px-2 py-2">End</th><th className="px-2 py-2">Status</th></tr></thead><tbody>{history.map((item) => <tr key={item.id} className="border-b border-line"><td className="px-2 py-2">{item.room.code}</td><td className="px-2 py-2">{item.subject?.code ?? '—'} · {item.section?.code ?? '—'}</td><td className="px-2 py-2">{item.checked_in_at ? formatTime(item.checked_in_at) : '—'}</td><td className="px-2 py-2">{item.checked_out_at ? formatTime(item.checked_out_at) : '—'}</td><td className="px-2 py-2">{item.checked_out_at ? 'Completed' : 'Active'}</td></tr>)}</tbody></table></div>
+          )}
         </CardBody>
       </Card>
     </>
