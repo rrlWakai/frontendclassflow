@@ -53,7 +53,7 @@ export function StudentScheduleConflicts({ compact = false }: { compact?: boolea
             </Badge>
           ) : null}
           {compact && result?.summary.conflict_pairs && result.summary.conflict_pairs > 2 ? (
-            <LinkButton to="/student/schedule-conflicts" variant="ghost" size="sm">
+            <LinkButton to="/student/attendance" variant="ghost" size="sm">
               View all
             </LinkButton>
           ) : null}

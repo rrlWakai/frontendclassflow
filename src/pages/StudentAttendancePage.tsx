@@ -6,6 +6,7 @@ import { Button } from '@/components/common/Button'
 import { Card, CardHeader } from '@/components/common/Card'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeading } from '@/components/common/PageHeading'
+import { useFeedback } from '@/components/common/Feedback'
 import { StudentQrScanner } from '@/components/attendance/StudentQrScanner'
 import { useSchedules } from '@/hooks/useSchedules'
 import {
@@ -35,6 +36,7 @@ const emptySummary: AttendanceSummary = {
 }
 
 export function StudentAttendancePage() {
+  const feedback = useFeedback()
   const { schedules, loading: schedulesLoading, error: schedulesError } = useSchedules()
   const [records, setRecords] = useState<AttendanceRecordItem[]>([])
   const [summary, setSummary] = useState<AttendanceSummary>(emptySummary)
@@ -117,6 +119,8 @@ export function StudentAttendancePage() {
     setError(null)
     try {
       await submitAttendanceExcuse(requestingSessionId, excuseReason.trim())
+      const submittedSession = eligibleSessions.find((entry) => entry.session.id === requestingSessionId)?.session
+      feedback.success(`Your excuse request for ${submittedSession?.offering?.subject?.code ?? 'this class'} on ${submittedSession?.class_date ?? 'this date'} was submitted. You'll see the decision under Attendance.`)
       setRequestingSessionId(null)
       setExcuseReason('')
       setRefreshVersion((version) => version + 1)
@@ -278,7 +282,7 @@ export function StudentAttendancePage() {
               Cancel
             </Button>
             <Button type="submit" size="sm" isLoading={isSubmittingExcuse}>
-              Submit request
+              Submit excuse request
             </Button>
           </div>
         </form>

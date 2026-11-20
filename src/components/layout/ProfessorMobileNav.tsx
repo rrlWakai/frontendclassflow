@@ -1,11 +1,12 @@
-import { ClipboardCheck, LayoutDashboard, Megaphone, Sparkles } from 'lucide-react'
+import { ClipboardCheck, LayoutDashboard, Megaphone, QrCode, Sparkles } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/utils/cn'
 
 const links = [
-  { to: '/professor/dashboard', label: 'Home', icon: LayoutDashboard },
+  { to: '/professor/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/professor/attendance', label: 'Attendance', icon: ClipboardCheck },
-  { to: '/professor/announcements', label: 'Notices', icon: Megaphone },
+  { to: '/professor/room-scanner', label: 'Room scanner', icon: QrCode },
+  { to: '/professor/announcements', label: 'Announcements', icon: Megaphone },
   { to: '/professor/activities', label: 'Activities', icon: Sparkles },
 ]
 
@@ -15,7 +16,7 @@ export function ProfessorMobileNav() {
       aria-label="Professor mobile"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur md:hidden"
     >
-      <div className="mx-auto grid max-w-md grid-cols-4">
+      <div className="mx-auto grid max-w-lg grid-cols-5">
         {links.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}

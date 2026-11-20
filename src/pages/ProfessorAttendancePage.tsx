@@ -241,9 +241,9 @@ export function ProfessorAttendancePage() {
 
     setConfirmDialog({
       variant: 'confirm',
-      title: 'Mark all present',
+      title: 'Mark remaining present',
       description: `Mark ${ids.length} unmarked student${ids.length === 1 ? '' : 's'} as Present. Already assigned statuses (Absent, Late, Excused) will be preserved.`,
-      confirmLabel: 'Mark all present',
+      confirmLabel: 'Mark remaining present',
       cancelLabel: 'Cancel',
       destructive: false,
       onConfirm: () => {
@@ -528,7 +528,7 @@ return (
                         disabled={unmarkedEnrollmentIds().length === 0 || isSaving}
                         onClick={() => void markAllPresent()}
                       >
-                        Mark all present
+                        Mark remaining present
                       </Button>
                     </>
                   ) : null}

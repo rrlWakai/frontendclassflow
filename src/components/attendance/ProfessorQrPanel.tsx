@@ -13,6 +13,7 @@ import {
 import { Badge } from '@/components/common/Badge'
 import { Button } from '@/components/common/Button'
 import { Card, CardHeader } from '@/components/common/Card'
+import { ConfirmationDialog } from '@/components/common/ConfirmationDialog'
 import {
   fetchAttendanceQrStatus,
   startAttendanceQr,
@@ -44,6 +45,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
   const [isStarting, setIsStarting] = useState(false)
   const [isStopping, setIsStopping] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showStopConfirm, setShowStopConfirm] = useState(false)
   const [nowTick, setNowTick] = useState(() => Date.now())
   const rotatingRef = useRef(false)
   const initializedRef = useRef(false)
@@ -142,10 +144,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
   }, [session.id])
 
   async function handleStop() {
-    if (!window.confirm('End QR attendance for this session? Students will no longer be able to check in.')) {
-      return
-    }
-
+    setShowStopConfirm(false)
     setIsStopping(true)
     setError(null)
 
@@ -326,7 +325,7 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
                   type="button"
                   variant="outline"
                   isLoading={isStopping}
-                  onClick={() => void handleStop()}
+                  onClick={() => setShowStopConfirm(true)}
                 >
                   <StopCircle className="size-4" aria-hidden="true" />
                   End QR attendance
@@ -361,6 +360,18 @@ export function ProfessorQrPanel({ session, onClose }: ProfessorQrPanelProps) {
           </div>
         )}
       </div>
+      {showStopConfirm ? (
+        <ConfirmationDialog
+          title="End QR attendance"
+          description="Students will no longer be able to check in to this session."
+          confirmLabel="End QR attendance"
+          cancelLabel="Cancel"
+          destructive
+          isLoading={isStopping}
+          onClose={() => setShowStopConfirm(false)}
+          onConfirm={() => void handleStop()}
+        />
+      ) : null}
     </Card>
   )
 }

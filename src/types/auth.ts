@@ -12,6 +12,10 @@ export interface StudentProfile {
   studentNumber: string
   program: ProgramSummary | null
   admittedOn: string | null
+  academicYear?: string | null
+  yearLevel?: { level: number; name: string } | null
+  major?: { code: string; name: string } | null
+  section?: { code: string; name: string | null } | null
 }
 
 export interface ProfessorProfile {
